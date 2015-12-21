@@ -32,6 +32,7 @@ public class ImageView extends javafx.scene.image.ImageView {
             rect = new Rectangle(e.getX(), e.getY(), 1, 1);
             rect.setStrokeWidth(1);
             rect.setStroke(Color.BLACK);
+            rect.getStrokeDashArray().addAll(5d, 5d);
             rect.setFill(Color.TRANSPARENT);
             pressedPoint = new Point2D(e.getX(), e.getY());
             pane.getChildren().add(rect);
@@ -44,7 +45,6 @@ public class ImageView extends javafx.scene.image.ImageView {
        addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
             rect.setWidth(e.getX() - pressedPoint.getX());
             rect.setHeight(e.getY() - pressedPoint.getY());
-            System.out.println(rect.getWidth());
         });
 
     }
