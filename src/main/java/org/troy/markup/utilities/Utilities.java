@@ -5,8 +5,6 @@
  */
 package org.troy.markup.utilities;
 
-import javafx.scene.image.Image;
-
 /**
  *
  * @author Troy

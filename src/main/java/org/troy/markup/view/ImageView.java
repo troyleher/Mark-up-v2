@@ -6,13 +6,17 @@
 package org.troy.markup.view;
 
 
+import org.troy.markup.controller.MainController;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
+import org.troy.markup.controller.Controller;
+import org.troy.markup.model.Annotation;
+import org.troy.markup.model.BeanManager;
+import org.troy.markup.utilities.Utilities;
 
 /**
  *
@@ -21,12 +25,10 @@ import javafx.scene.shape.Shape;
 public class ImageView extends javafx.scene.image.ImageView {
 
     private Point2D pressedPoint;
-    private Pane pane;
     private Rectangle rect ;
 
-    public ImageView(Image image, Pane pane) {
+    public ImageView(Image image, Controller c) {
         super(image);
-        this.pane = pane;
 
         addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
             rect = new Rectangle(e.getX(), e.getY(), 1, 1);
@@ -35,12 +37,11 @@ public class ImageView extends javafx.scene.image.ImageView {
             rect.getStrokeDashArray().addAll(5d, 5d);
             rect.setFill(Color.TRANSPARENT);
             pressedPoint = new Point2D(e.getX(), e.getY());
-            pane.getChildren().add(rect);
-            System.out.println("Mouse pressed");
+            c.displayDraggingRectangle(rect);
         });
         addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
-            pane.getChildren().remove(rect);
-
+            c.removeDraggingRectangle(rect);
+            c.createAndDisplayAnnotation(rect);
         });
        addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
             rect.setWidth(e.getX() - pressedPoint.getX());
