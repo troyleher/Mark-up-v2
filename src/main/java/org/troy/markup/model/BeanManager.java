@@ -7,32 +7,36 @@ package org.troy.markup.model;
 
 import java.util.LinkedList;
 import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  *
  * @author Troy
  */
 public class BeanManager {
-    
-    private List<Annotation> annotationList = new LinkedList<>();
+
+    private ObservableList<Annotation> annotationList;
     private static BeanManager beanManager;
-    
-    private BeanManager(){}
-    
-    public static BeanManager createInstance(){
-        if(beanManager == null){
+
+    private BeanManager() {
+        annotationList = FXCollections.observableArrayList(new LinkedList<>());
+    }
+
+    public static BeanManager createInstance() {
+        if (beanManager == null) {
             beanManager = new BeanManager();
+
         }
         return beanManager;
     }
 
-    public List<Annotation> getAnnotationList() {
+    public ObservableList<Annotation> getAnnotationList() {
         return annotationList;
     }
-    public void addAnnotationToList(Annotation a){
+
+    public void addAnnotationToList(Annotation a) {
         annotationList.add(a);
     }
-    
-    
-    
+
 }

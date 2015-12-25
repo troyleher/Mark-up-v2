@@ -5,72 +5,67 @@
  */
 package org.troy.markup.model;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.shape.Circle;
 
 /**
  *
  * @author Troy
  */
-public class AnnotationCircleBean {
-    private DoubleProperty xPos = new SimpleDoubleProperty(this, "xPos", 0);
-    private DoubleProperty yPos = new SimpleDoubleProperty(this, "yPos", 0);
-    private DoubleProperty radius = new SimpleDoubleProperty(this, "radius", 0);
+public class AnnotationCircleBean extends Circle{
+    
     
     private AnnotationCircleBean(){}
     public AnnotationCircleBean(double xPos, double yPos, double radius){
-        this.xPos.set(xPos);
-        this.yPos.set(xPos);
-        this.radius.set(radius);
+       super(xPos, yPos, radius);
     }
 
-    public double getxPos() {
-        return xPos.doubleValue();
+    public double getXPos() {
+        return getCenterX();
     }
 
-    public void setxPos(double xPos) {
-        this.xPos.set(xPos);
-    }
-    public DoubleProperty xPosDoubleProperty(){
-        return xPos;
+    public void setXPos(double xPos) {
+        setCenterX(xPos);
     }
 
-    public double getyPos() {
-        return yPos.doubleValue();
+
+    public double getYPos() {
+        return getCenterY();
     }
 
-    public void setyPos(double yPos) {
-        this.yPos.set(yPos);
+    public void setYPos(double yPos) {
+        setCenterY(yPos);
     }
     
-    public DoubleProperty yPosDoubleProperty(){
-        return yPos;
+    public double getCircleRadius() {
+        return getRadius();
     }
 
-    public double getRadius() {
-        return radius.get();
+    public void setCircleRadius(double radius) {
+        setRadius(radius);
     }
-
-    public void setRadius(double radius) {
-        this.radius.set(radius);
-    }
-    public DoubleProperty radiusDoubleProperty(){return radius;}
+   
+    
 
     @Override
     public boolean equals(Object obj) {
         boolean isEqual = false;
         if(obj instanceof AnnotationCircleBean){
             AnnotationCircleBean aCircle = (AnnotationCircleBean)obj;
-            if(aCircle.xPos.get() == this.xPos.get())
-                if(aCircle.yPos.get() == this.yPos.get())
-                    if(aCircle.radius.get() == this.getRadius()){
+          
+            if(aCircle.getCenterX() == this.getCenterX())
+                if(aCircle.getCenterY() == this.getCenterY())
+                    if(aCircle.getRadius() == this.getRadius()){
                         isEqual = true;
                     }
         }
         return isEqual;
     }
+
+    @Override
+    public int hashCode() {
+        return centerXProperty().hashCode() + centerYProperty().hashCode() + radiusProperty().hashCode();
+    }
+    
     
     
     

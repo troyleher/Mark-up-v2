@@ -6,17 +6,12 @@
 package org.troy.markup.view;
 
 
-import org.troy.markup.controller.MainController;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.troy.markup.controller.Controller;
-import org.troy.markup.model.Annotation;
-import org.troy.markup.model.BeanManager;
-import org.troy.markup.utilities.Utilities;
 
 /**
  *
@@ -47,6 +42,7 @@ public class ImageView extends javafx.scene.image.ImageView {
             rect.setWidth(e.getX() - pressedPoint.getX());
             rect.setHeight(e.getY() - pressedPoint.getY());
         });
+      
 
     }
 
