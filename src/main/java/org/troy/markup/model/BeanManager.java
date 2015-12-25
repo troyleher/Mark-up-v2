@@ -6,7 +6,6 @@
 package org.troy.markup.model;
 
 import java.util.LinkedList;
-import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -33,6 +32,11 @@ public class BeanManager {
 
     public ObservableList<Annotation> getAnnotationList() {
         return annotationList;
+    }
+    
+    public void setAnnotationList(ObservableList<Annotation> aList){
+        annotationList.clear();
+        annotationList.addAll(aList);
     }
 
     public void addAnnotationToList(Annotation a) {

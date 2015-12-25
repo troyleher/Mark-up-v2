@@ -5,10 +5,20 @@
  */
 package org.troy.markup.controller;
 
+import java.util.List;
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -20,7 +30,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.troy.markup.memento.UndoRedoManager;
+import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.BeanManager;
 import org.troy.markup.model.ConfigurationBean;
@@ -50,10 +63,51 @@ public class MainController extends Application implements Controller {
         imagePane = new AnchorPane();
         borderPane.setCenter(imagePane);
 
+        //Set up and menu bar
+        MenuBar menuBar = new MenuBar();
+
+        Menu fileMenu = new Menu("File");
+        menuBar.getMenus().add(fileMenu);
+
+        Menu editMenu = new Menu("Edit");
+        MenuItem redoMenuItem = new MenuItem("redo");
+        redoMenuItem.setDisable(true);
+        ObservableList<ObservableList<Annotation>> redoList = UndoRedoManagerImpl.getInstance().getRedoList();
+        redoList.addListener((ListChangeListener.Change<? extends ObservableList<Annotation>> c) -> {
+            if (c.getList().isEmpty()) {
+                redoMenuItem.setDisable(true);
+            } else {
+                redoMenuItem.setDisable(false);
+            }
+        });
+        redoMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
+
+        });
+
+        MenuItem undoMenuItem = new MenuItem("undo");
+        undoMenuItem.setDisable(true);
+        ObservableList<ObservableList<Annotation>> saveList = UndoRedoManagerImpl.getInstance().getSaveList();
+        saveList.addListener((ListChangeListener.Change<? extends ObservableList<Annotation>> c) -> {
+            if (c.getList().isEmpty()) {
+                undoMenuItem.setDisable(true);
+            } else {
+                undoMenuItem.setDisable(false);
+            }
+        });
+        undoMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
+            UndoRedoManager urm = UndoRedoManagerImpl.getInstance();
+            BeanManager.createInstance().setAnnotationList(urm.undo());
+        });
+        editMenu.getItems().addAll(redoMenuItem, undoMenuItem);
+        menuBar.getMenus().add(editMenu);
+        borderPane.setTop(menuBar);
+
         //Load a sample image for development only
         Image image = new Image("/images/test.png");
         imageView = new ImageView(image, this);
         imagePane.getChildren().add(imageView);
+
+        setUpChangeListenerForChangingList();
 
         //Load table view
         TableView<Annotation> tableView = new TableView<>();
@@ -90,18 +144,35 @@ public class MainController extends Application implements Controller {
 
     }
 
-    public void addAnnotationToView(Annotation a) {
-
+    private void setUpChangeListenerForChangingList() {
+        //Set up listener for annotation list
+        ObservableList<Annotation> aList = bm.getAnnotationList();
+        aList.addListener((ListChangeListener.Change<? extends Annotation> c) -> {
+            if (c.next()) {
+                if (c.wasAdded()) {
+                    List<? extends Annotation> addedList = c.getAddedSubList();
+                    addedList.stream().forEach((a) -> {
+                        imagePane.getChildren().add(a.getDisplableNode());
+                    });
+                }
+                if (c.wasRemoved()) {
+                    List<? extends Annotation> removedList = c.getRemoved();
+                    removedList.stream().forEach((a) -> {
+                        imagePane.getChildren().remove(a.getDisplableNode());
+                    });
+                }
+            }
+        });
     }
 
     @Override
     public void createAndDisplayAnnotation(Rectangle r) {
         Annotation a = new Annotation(r.getX(), r.getY(), r.getWidth(), r.getHeight());
         bm.addAnnotationToList(a);
-        imagePane.getChildren().add(a.getText());
-        imagePane.getChildren().add(a.getCircle());
-        imagePane.getChildren().add(a.getRectangle());
+        UndoRedoManager undoManager = UndoRedoManagerImpl.getInstance();
+        undoManager.save(bm.getAnnotationList());
 
+        //imagePane.getChildren().add(a.getDisplableNode());
     }
 
     @Override

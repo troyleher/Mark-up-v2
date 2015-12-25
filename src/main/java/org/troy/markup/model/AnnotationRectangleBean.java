@@ -22,6 +22,9 @@ public class AnnotationRectangleBean extends Rectangle{
             double width, double height) {
         super(xPos, yPos, width, height);
     }
+    public AnnotationRectangleBean(AnnotationRectangleBean a){
+        this(a.getX(), a.getY(), a.getWidth(), a.getHeight());
+    }
 
     
     public final void setXPos(Double value) {

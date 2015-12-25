@@ -18,6 +18,9 @@ public class AnnotationCircleBean extends Circle{
     public AnnotationCircleBean(double xPos, double yPos, double radius){
        super(xPos, yPos, radius);
     }
+    public AnnotationCircleBean(AnnotationCircleBean circle){
+        this(circle.getXPos(), circle.getYPos(), circle.getRadius());
+    }
 
     public double getXPos() {
         return getCenterX();

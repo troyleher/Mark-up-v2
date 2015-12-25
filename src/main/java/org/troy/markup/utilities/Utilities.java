@@ -5,11 +5,24 @@
  */
 package org.troy.markup.utilities;
 
+import java.util.ArrayList;
+import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.troy.markup.model.Annotation;
+
 /**
  *
  * @author Troy
  */
 public class Utilities {
-    
-    
+
+    public static ObservableList<Annotation> copy(ObservableList<Annotation> listToCopy) {
+        ObservableList<Annotation> newList = FXCollections.observableArrayList(new ArrayList<>(listToCopy.size()));
+        listToCopy.stream().forEach((a) -> {
+            newList.add(new Annotation(a));
+        });
+        return newList;
+    }
+
 }

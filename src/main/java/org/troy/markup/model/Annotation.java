@@ -7,6 +7,9 @@ package org.troy.markup.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.ObservableList;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import org.troy.markup.state.AnnotationMouseDefaultState;
@@ -22,19 +25,41 @@ public final class Annotation {
 
     private AnnotationCircleBean circle;
     private AnnotationRectangleBean rectangle;
-    private Text text;
+    private StringProperty symbol = new SimpleStringProperty(this, "symbol", null);
     private StringProperty description = new SimpleStringProperty(this, "description", "To be done.");
     private AnnotationMouseState annotationMouseState;
+    private Group group;
     private boolean isCirclePressed = false;
+
+    public Annotation() {
+        this(0, 0, 0, 0);
+    }
 
     public Annotation(double xPos, double yPos, double width, double height) {
         setUpAnnotationRectangle(xPos, yPos, width, height);
         setUpAnnotationCircle(xPos, yPos);
-        text = new Text(AnnotationLetterFactory.createLetter());
-        text.xProperty().bind(circle.centerXProperty().subtract(+5));
-        text.yProperty().bind(circle.centerYProperty().add(5));
+        symbol.set(AnnotationLetterFactory.createLetter());
         annotationMouseState = new AnnotationMouseDefaultState();
         annotationMouseState.changeEffects(this);
+    }
+
+    public Annotation(Annotation a) {
+        this.rectangle = new AnnotationRectangleBean(a.getRectangle());
+        this.circle = new AnnotationCircleBean(a.getCircle());
+        this.setDescription(a.getDescription());
+
+    }
+
+    public Node getDisplableNode() {
+        if (group == null) {
+            group = new Group();
+        }
+        ObservableList<Node> children = group.getChildren();
+        children.clear();
+        children.add(rectangle);
+        children.add(createTextNode(this));
+        children.add(circle);
+        return group;
     }
 
     private void setUpAnnotationCircle(double xPos, double yPos) {
@@ -57,6 +82,13 @@ public final class Annotation {
         });
     }
 
+    private Text createTextNode(Annotation a) {
+        Text text = new Text(a.getSymbol());
+        text.xProperty().bind(a.getCircle().centerXProperty().subtract(+5));
+        text.yProperty().bind(a.getCircle().centerYProperty().add(5));
+        return text;
+    }
+
     private void setUpAnnotationRectangle(double xPos, double yPos, double width, double height) {
         rectangle = new AnnotationRectangleBean(xPos, yPos, width, height);
         //rectangle.setPickOnBounds(false);
@@ -77,12 +109,18 @@ public final class Annotation {
     }
 
     public String getSymbol() {
-        return text.textProperty().get();
-    }
-    public void setSymbol(String symbol){
-        text.setText(symbol);
+        return symbol.getValue();
     }
 
+    public void setSymbol(String symbol) {
+        this.symbol.set(symbol);
+    }
+
+    /**
+     * public String getSymbol() { return text.textProperty().get(); } public
+     * void setSymbol(String symbol){ text.setText(symbol); }
+     *
+     */
     public AnnotationMouseState getAnnotationMouseState() {
         return annotationMouseState;
     }
@@ -91,14 +129,12 @@ public final class Annotation {
         this.annotationMouseState = annotationMouseState;
     }
 
-    public Text getText() {
-        return text;
-    }
-
-    public void setText(Text text) {
-        this.text = text;
-    }
-
+    /**
+     * public Text getText() { return text; }
+     *
+     * public void setText(Text text) { this.text = text; }
+     *
+     */
     public String getDescription() {
         return description.get();
     }
@@ -106,6 +142,5 @@ public final class Annotation {
     public void setDescription(String description) {
         this.description.set(description);
     }
-    
 
 }

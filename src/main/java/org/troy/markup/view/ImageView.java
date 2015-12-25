@@ -12,6 +12,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.troy.markup.controller.Controller;
+import org.troy.markup.memento.UndoRedoManagerImpl;
+import org.troy.markup.model.BeanManager;
 
 /**
  *
