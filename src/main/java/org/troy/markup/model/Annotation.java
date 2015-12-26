@@ -12,6 +12,8 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
+import org.troy.markup.memento.UndoRedoManager;
+import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.state.AnnotationMouseDefaultState;
 import org.troy.markup.state.AnnotationMouseEnteredState;
 import org.troy.markup.state.AnnotationMouseState;
@@ -30,6 +32,8 @@ public final class Annotation {
     private AnnotationMouseState annotationMouseState;
     private Group group;
     private boolean isCirclePressed = false;
+    private BeanManager bm = BeanManager.createInstance();
+    UndoRedoManager urm = UndoRedoManagerImpl.getInstance();
 
     public Annotation() {
         this(0, 0, 0, 0);
@@ -44,9 +48,14 @@ public final class Annotation {
     }
 
     public Annotation(Annotation a) {
-        this.rectangle = new AnnotationRectangleBean(a.getRectangle());
-        this.circle = new AnnotationCircleBean(a.getCircle());
+        AnnotationRectangleBean rect = a.getRectangle();
+        AnnotationCircleBean c = a.getCircle();
+        setUpAnnotationRectangle(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+        setUpAnnotationCircle(c.getXPos(), c.getYPos(), c.getRadius());
         this.setDescription(a.getDescription());
+        annotationMouseState = a.getAnnotationMouseState();
+        annotationMouseState.changeEffects(this);
+        this.setSymbol(a.getSymbol());
 
     }
 
@@ -64,6 +73,10 @@ public final class Annotation {
 
     private void setUpAnnotationCircle(double xPos, double yPos) {
         circle = new AnnotationCircleBean(xPos - 10, yPos - 10, 10);
+        setUpAnnotationCircleMouseEvents();
+    }
+
+    private void setUpAnnotationCircleMouseEvents() {
         circle.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
             new AnnotationMouseEnteredState().changeEffects(this);
         });
@@ -75,11 +88,18 @@ public final class Annotation {
         });
         circle.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
             isCirclePressed = false;
+            urm.save(bm.getAnnotationList());
         });
         circle.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
             circle.setXPos(e.getX());
             circle.setYPos(e.getY());
+            
+            
         });
+    }
+    private void setUpAnnotationCircle(double xPos, double yPos, double radius){
+        circle = new AnnotationCircleBean(xPos, yPos, radius);
+        setUpAnnotationCircleMouseEvents();
     }
 
     private Text createTextNode(Annotation a) {

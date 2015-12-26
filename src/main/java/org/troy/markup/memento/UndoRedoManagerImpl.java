@@ -5,8 +5,6 @@
  */
 package org.troy.markup.memento;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.LinkedList;
 import java.util.List;
 import javafx.collections.FXCollections;
