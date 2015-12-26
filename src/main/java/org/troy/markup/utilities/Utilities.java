@@ -25,4 +25,14 @@ public class Utilities {
         return newList;
     }
 
+    public static ObservableList<Annotation> reLetter(ObservableList<Annotation> annotList) {
+        ObservableList<Annotation> modifiedList = FXCollections.observableArrayList(new ArrayList<>(annotList.size()));
+        AnnotationLetterFactory.setCurrentLetter(AnnotationLetterFactory.RESET);
+        for (Annotation a : annotList) {
+            Annotation newA = new Annotation(a);
+            newA.setSymbol(AnnotationLetterFactory.createLetter());
+            modifiedList.add(newA);
+        }
+        return modifiedList;
+    }
 }

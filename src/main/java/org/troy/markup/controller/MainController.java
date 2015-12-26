@@ -7,11 +7,6 @@ package org.troy.markup.controller;
 
 import java.util.List;
 import javafx.application.Application;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -30,13 +25,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.troy.markup.memento.UndoRedoManager;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.BeanManager;
 import org.troy.markup.model.ConfigurationBean;
+import org.troy.markup.utilities.Utilities;
 import org.troy.markup.view.ImageView;
 
 /**
@@ -48,7 +43,11 @@ public class MainController extends Application implements Controller {
     private ImageView imageView;
     private Pane imagePane;
     private BeanManager bm;
+    private UndoRedoManager urm;
     private ContextMenu tableViewContextMenu;
+    private MenuItem deleteMenuItem;
+
+    private final static String SELECTED_INDEX = "SELECTED_INDEX";
 
     public static void main(String... args) {
         Application.launch(args);
@@ -58,6 +57,7 @@ public class MainController extends Application implements Controller {
     public void start(Stage primaryStage) throws Exception {
         ConfigurationBean configBean = ConfigurationBean.createInstance();
         bm = BeanManager.createInstance();
+        urm = UndoRedoManagerImpl.getInstance();
         BorderPane borderPane = new BorderPane();
 
         imagePane = new AnchorPane();
@@ -78,8 +78,10 @@ public class MainController extends Application implements Controller {
 
         //Set up context menu for tableview
         tableViewContextMenu = new ContextMenu();
-        MenuItem menu = new MenuItem("Test");
-        tableViewContextMenu.getItems().add(menu);
+        deleteMenuItem = new MenuItem("Delete");
+        deleteMenuItem.addEventHandler(ActionEvent.ACTION, this::deleteButtonAction);
+
+        tableViewContextMenu.getItems().add(deleteMenuItem);
         tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 if (tableViewContextMenu.isShowing()) {
@@ -87,6 +89,7 @@ public class MainController extends Application implements Controller {
                 }
                 if (tableView.getSelectionModel().getSelectedIndex() >= 0) {
                     tableViewContextMenu.show(tableView, e.getScreenX(), e.getScreenY());
+                    deleteMenuItem.getProperties().put(SELECTED_INDEX, tableView.getSelectionModel().getSelectedIndex());
                 }
             }
         });
@@ -126,7 +129,6 @@ public class MainController extends Application implements Controller {
             }
         });
         redoMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
-            UndoRedoManager urm = UndoRedoManagerImpl.getInstance();
             BeanManager.createInstance().setAnnotationList(urm.redo());
         });
 
@@ -172,18 +174,19 @@ public class MainController extends Application implements Controller {
     }
 
     /**
-     * Creates and displays an annotation on top of the image, it is limited to a
-     * rectangle that is greater than 10 x 10 square
+     * Creates and displays an annotation on top of the image, it is limited to
+     * a rectangle that is greater than 10 x 10 square
      *
      * @param r
      */
     @Override
     public void createAndDisplayAnnotation(Rectangle r) {
         if (r.getWidth() > 10 && r.getHeight() > 10) {
+            bm.setAnnotationList(Utilities.reLetter(bm.getAnnotationList()));
             Annotation a = new Annotation(r.getX(), r.getY(), r.getWidth(), r.getHeight());
             bm.addAnnotationToList(a);
-            UndoRedoManager undoManager = UndoRedoManagerImpl.getInstance();
-            undoManager.save(bm.getAnnotationList());
+            //System.out.printf("Number of elements in list = %s", bm.getAnnotationList().size());
+            urm.save(bm.getAnnotationList());
         }
     }
 
@@ -195,6 +198,16 @@ public class MainController extends Application implements Controller {
     @Override
     public void removeDraggingRectangle(Rectangle r) {
         imagePane.getChildren().remove(r);
+    }
+
+    private void deleteButtonAction(ActionEvent e) {
+        int indexToDelete = (Integer) deleteMenuItem.getProperties().get(SELECTED_INDEX);
+        //System.out.printf("Index to delete %s \n" , index);
+        ObservableList<Annotation> aList = bm.getAnnotationList();
+        aList.remove(indexToDelete);
+        aList = bm.getAnnotationList();
+        bm.setAnnotationList(Utilities.reLetter(aList));
+        urm.save(aList);
     }
 
 }
