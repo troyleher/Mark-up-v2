@@ -18,6 +18,7 @@ import org.troy.markup.state.AnnotationMouseDefaultState;
 import org.troy.markup.state.AnnotationMouseEnteredState;
 import org.troy.markup.state.AnnotationMouseState;
 import org.troy.markup.utilities.AnnotationLetterFactory;
+import org.troy.markup.view.AnnotationEditingDialog;
 
 /**
  *
@@ -93,8 +94,12 @@ public final class Annotation {
         circle.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
             circle.setXPos(e.getX());
             circle.setYPos(e.getY());
-            
-            
+        });
+        circle.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            if(e.getClickCount() == 2){
+                AnnotationEditingDialog aed = new AnnotationEditingDialog();
+                aed.show();
+            }
         });
     }
     private void setUpAnnotationCircle(double xPos, double yPos, double radius){

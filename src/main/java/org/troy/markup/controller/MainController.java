@@ -143,8 +143,7 @@ public class MainController extends Application implements Controller {
             }
         });
         undoMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
-            UndoRedoManager urm = UndoRedoManagerImpl.getInstance();
-            BeanManager.createInstance().setAnnotationList(urm.undo());
+            bm.setAnnotationList(urm.undo());
         });
         editMenu.getItems().addAll(redoMenuItem, undoMenuItem);
         menuBar.getMenus().add(editMenu);
