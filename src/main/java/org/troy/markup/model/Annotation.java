@@ -5,10 +5,12 @@
  */
 package org.troy.markup.model;
 
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
-import javafx.scene.Group;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
@@ -18,7 +20,6 @@ import org.troy.markup.state.AnnotationMouseDefaultState;
 import org.troy.markup.state.AnnotationMouseEnteredState;
 import org.troy.markup.state.AnnotationMouseState;
 import org.troy.markup.utilities.AnnotationLetterFactory;
-import org.troy.markup.view.AnnotationEditingDialog;
 
 /**
  *
@@ -31,8 +32,11 @@ public final class Annotation {
     private StringProperty symbol = new SimpleStringProperty(this, "symbol", null);
     private StringProperty description = new SimpleStringProperty(this, "description", "To be done.");
     private AnnotationMouseState annotationMouseState;
-    private Group group;
-    private boolean isCirclePressed = false;
+    private Text symbolText;
+    private ObservableMap<String, Object> properties = FXCollections.observableHashMap();
+    
+    public static final String GROUP_NODE = "GROUP_NODE";
+
     private BeanManager bm = BeanManager.createInstance();
     UndoRedoManager urm = UndoRedoManagerImpl.getInstance();
 
@@ -60,58 +64,12 @@ public final class Annotation {
 
     }
 
-    public Node getDisplableNode() {
-        if (group == null) {
-            group = new Group();
-        }
-        ObservableList<Node> children = group.getChildren();
-        children.clear();
-        children.add(rectangle);
-        children.add(createTextNode(this));
-        children.add(circle);
-        return group;
-    }
-
     private void setUpAnnotationCircle(double xPos, double yPos) {
         circle = new AnnotationCircleBean(xPos - 10, yPos - 10, 10);
-        setUpAnnotationCircleMouseEvents();
     }
 
-    private void setUpAnnotationCircleMouseEvents() {
-        circle.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
-            new AnnotationMouseEnteredState().changeEffects(this);
-        });
-        circle.addEventFilter(MouseEvent.MOUSE_EXITED, e -> {
-            new AnnotationMouseDefaultState().changeEffects(this);
-        });
-        circle.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
-            isCirclePressed = true;
-        });
-        circle.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
-            isCirclePressed = false;
-            urm.save(bm.getAnnotationList());
-        });
-        circle.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
-            circle.setXPos(e.getX());
-            circle.setYPos(e.getY());
-        });
-        circle.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-            if(e.getClickCount() == 2){
-                AnnotationEditingDialog aed = new AnnotationEditingDialog();
-                aed.show();
-            }
-        });
-    }
-    private void setUpAnnotationCircle(double xPos, double yPos, double radius){
+     private void setUpAnnotationCircle(double xPos, double yPos, double radius) {
         circle = new AnnotationCircleBean(xPos, yPos, radius);
-        setUpAnnotationCircleMouseEvents();
-    }
-
-    private Text createTextNode(Annotation a) {
-        Text text = new Text(a.getSymbol());
-        text.xProperty().bind(a.getCircle().centerXProperty().subtract(+5));
-        text.yProperty().bind(a.getCircle().centerYProperty().add(5));
-        return text;
     }
 
     private void setUpAnnotationRectangle(double xPos, double yPos, double width, double height) {
@@ -141,11 +99,6 @@ public final class Annotation {
         this.symbol.set(symbol);
     }
 
-    /**
-     * public String getSymbol() { return text.textProperty().get(); } public
-     * void setSymbol(String symbol){ text.setText(symbol); }
-     *
-     */
     public AnnotationMouseState getAnnotationMouseState() {
         return annotationMouseState;
     }
@@ -154,12 +107,6 @@ public final class Annotation {
         this.annotationMouseState = annotationMouseState;
     }
 
-    /**
-     * public Text getText() { return text; }
-     *
-     * public void setText(Text text) { this.text = text; }
-     *
-     */
     public String getDescription() {
         return description.get();
     }
@@ -167,5 +114,25 @@ public final class Annotation {
     public void setDescription(String description) {
         this.description.set(description);
     }
+
+    public Text getSymbolText() {
+        return symbolText;
+    }
+
+    public void setSymbolText(Text symbolText) {
+        this.symbolText = symbolText;
+    }
+
+    public ObservableMap<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(ObservableMap<String, Object> properties) {
+        this.properties = properties;
+    }
+    
+    
+
+    
 
 }

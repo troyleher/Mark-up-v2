@@ -5,11 +5,14 @@
  */
 package org.troy.markup.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Application;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
@@ -25,13 +28,19 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.troy.markup.memento.UndoRedoManager;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
+import org.troy.markup.model.AnnotationCircleBean;
 import org.troy.markup.model.BeanManager;
 import org.troy.markup.model.ConfigurationBean;
+import org.troy.markup.state.AnnotationMouseDefaultState;
+import org.troy.markup.state.AnnotationMouseEnteredState;
 import org.troy.markup.utilities.Utilities;
+import org.troy.markup.view.AnnotationEditingDialog;
+import org.troy.markup.view.AnnotationText;
 import org.troy.markup.view.ImageView;
 
 /**
@@ -159,13 +168,14 @@ public class MainController extends Application implements Controller {
                 if (c.wasAdded()) {
                     List<? extends Annotation> addedList = c.getAddedSubList();
                     addedList.stream().forEach((a) -> {
-                        imagePane.getChildren().add(a.getDisplableNode());
+                        a.getProperties().put(Annotation.GROUP_NODE, getDisplableNode(a));
+                        imagePane.getChildren().add((Node)a.getProperties().get(Annotation.GROUP_NODE));
                     });
                 }
                 if (c.wasRemoved()) {
                     List<? extends Annotation> removedList = c.getRemoved();
                     removedList.stream().forEach((a) -> {
-                        imagePane.getChildren().remove(a.getDisplableNode());
+                        imagePane.getChildren().remove((Node)a.getProperties().get(Annotation.GROUP_NODE));
                     });
                 }
             }
@@ -182,8 +192,12 @@ public class MainController extends Application implements Controller {
     public void createAndDisplayAnnotation(Rectangle r) {
         if (r.getWidth() > 10 && r.getHeight() > 10) {
             bm.setAnnotationList(Utilities.reLetter(bm.getAnnotationList()));
-            Annotation a = new Annotation(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-            bm.addAnnotationToList(a);
+            for (Annotation a1 : bm.getAnnotationList()) {
+                setUpAnnotationCircleMouseEvents(a1);
+            }
+            Annotation a2 = new Annotation(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+            setUpAnnotationCircleMouseEvents(a2);
+            bm.addAnnotationToList(a2);
             //System.out.printf("Number of elements in list = %s", bm.getAnnotationList().size());
             urm.save(bm.getAnnotationList());
         }
@@ -207,6 +221,50 @@ public class MainController extends Application implements Controller {
         aList = bm.getAnnotationList();
         bm.setAnnotationList(Utilities.reLetter(aList));
         urm.save(aList);
+    }
+
+    private void setUpAnnotationCircleMouseEvents(Annotation a) {
+        AnnotationCircleBean circle = a.getCircle();
+        circle.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
+            new AnnotationMouseEnteredState().changeEffects(a);
+        });
+        circle.addEventFilter(MouseEvent.MOUSE_EXITED, e -> {
+            new AnnotationMouseDefaultState().changeEffects(a);
+        });
+        circle.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
+            circle.setIsCirclePressed(true);
+
+        });
+        circle.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
+            circle.setIsCirclePressed(false);
+            urm.save(bm.getAnnotationList());
+        });
+        circle.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
+            circle.setXPos(e.getX());
+            circle.setYPos(e.getY());
+        });
+        circle.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            if (e.getClickCount() == 2) {
+                AnnotationEditingDialog aed = new AnnotationEditingDialog();
+                aed.show();
+            }
+        });
+    }
+
+    private Node getDisplableNode(Annotation a) {
+        Group group = new Group();
+        ObservableList<Node> children = group.getChildren();
+        children.add(a.getRectangle());
+        children.add(createTextNode(a));
+        children.add(a.getCircle());
+        return group;
+    }
+
+    private Text createTextNode(Annotation a) {
+        Text text = new AnnotationText(a.getSymbol());
+        text.xProperty().bind(a.getCircle().centerXProperty().subtract(+5));
+        text.yProperty().bind(a.getCircle().centerYProperty().add(5));
+        return text;
     }
 
 }

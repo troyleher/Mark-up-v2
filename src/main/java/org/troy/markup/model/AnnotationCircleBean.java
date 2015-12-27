@@ -13,6 +13,7 @@ import javafx.scene.shape.Circle;
  */
 public class AnnotationCircleBean extends Circle{
     
+    private boolean isCirclePressed = false;
     
     private AnnotationCircleBean(){}
     public AnnotationCircleBean(double xPos, double yPos, double radius){
@@ -46,9 +47,15 @@ public class AnnotationCircleBean extends Circle{
     public void setCircleRadius(double radius) {
         setRadius(radius);
     }
-   
-    
 
+    public boolean isIsCirclePressed() {
+        return isCirclePressed;
+    }
+
+    public void setIsCirclePressed(boolean isCirclePressed) {
+        this.isCirclePressed = isCirclePressed;
+    }
+    
     @Override
     public boolean equals(Object obj) {
         boolean isEqual = false;
