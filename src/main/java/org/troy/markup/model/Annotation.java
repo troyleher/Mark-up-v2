@@ -5,13 +5,10 @@
  */
 package org.troy.markup.model;
 
-import javafx.beans.property.MapProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
-import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import org.troy.markup.memento.UndoRedoManager;
@@ -115,6 +112,9 @@ public final class Annotation {
         this.description.set(description);
     }
 
+    public StringProperty descriptionProperty(){
+        return description;
+    }
     public Text getSymbolText() {
         return symbolText;
     }

@@ -5,7 +5,6 @@
  */
 package org.troy.markup.state;
 
-import javafx.scene.effect.Glow;
 import javafx.scene.paint.Color;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.AnnotationCircleBean;
@@ -16,25 +15,22 @@ import org.troy.markup.model.BeanManager;
  *
  * @author Troy
  */
-public class AnnotationMouseEnteredState implements AnnotationMouseState{
+public class AnnotationTableRowSelectedState implements AnnotationMouseState {
 
     @Override
     public void changeEffects(Annotation a) {
         AnnotationRectangleBean rect = a.getRectangle();
         AnnotationCircleBean circle = a.getCircle();
-        
-        rect.setStroke(Color.BLACK);
+
+        rect.setStroke(Color.ROYALBLUE);
         rect.setStrokeWidth(2);
         //rect.setEffect(new Glow(1.0));
         rect.setStyle("-fx-fill: null;");
-        
-        circle.setStroke(Color.BLACK);
+
+        circle.setStroke(Color.ROYALBLUE);
         circle.setStrokeWidth(2);
         circle.setFill(Color.TRANSPARENT);
-     
-  
-        
-        
+
     }
-    
+
 }

@@ -8,6 +8,7 @@ package org.troy.markup.model;
 import java.util.LinkedList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.troy.markup.utilities.Utilities;
 
 /**
  *
@@ -15,7 +16,7 @@ import javafx.collections.ObservableList;
  */
 public class BeanManager {
 
-    private ObservableList<Annotation> annotationList;
+    private final ObservableList<Annotation> annotationList;
     private static BeanManager beanManager;
 
     private BeanManager() {
@@ -33,10 +34,17 @@ public class BeanManager {
     public ObservableList<Annotation> getAnnotationList() {
         return annotationList;
     }
-    
-    public void setAnnotationList(ObservableList<Annotation> aList){
-        annotationList.clear();
-        annotationList.addAll(aList);
+
+    public void setAnnotationList(ObservableList<Annotation> aList) {
+        if (aList != annotationList) {
+            annotationList.clear();
+            annotationList.addAll(aList);
+
+        }
+        synchronized (annotationList) {
+            annotationList.notifyAll();
+        }
+
     }
 
     public void addAnnotationToList(Annotation a) {

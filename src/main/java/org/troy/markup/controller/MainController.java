@@ -7,6 +7,8 @@ package org.troy.markup.controller;
 
 import java.util.List;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -37,6 +39,7 @@ import org.troy.markup.model.BeanManager;
 import org.troy.markup.model.ConfigurationBean;
 import org.troy.markup.state.AnnotationMouseDefaultState;
 import org.troy.markup.state.AnnotationMouseEnteredState;
+import org.troy.markup.state.AnnotationTableRowSelectedState;
 import org.troy.markup.utilities.Utilities;
 import org.troy.markup.view.AnnotationEditingDialog;
 import org.troy.markup.view.ImageView;
@@ -79,6 +82,15 @@ public class MainController extends Application implements Controller {
 
         setUpChangeListenerForChangingList();
 
+        setUpTableView(borderPane);
+
+        primaryStage.setScene(new Scene(borderPane));
+        primaryStage.setTitle(configBean.getMainFrameTitle());
+        primaryStage.show();
+
+    }
+
+    private void setUpTableView(BorderPane borderPane) {
         //Load table view
         TableView<Annotation> tableView = new TableView<>();
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -94,12 +106,28 @@ public class MainController extends Application implements Controller {
                 if (tableViewContextMenu.isShowing()) {
                     tableViewContextMenu.hide();
                 }
-                if (tableView.getSelectionModel().getSelectedIndex() >= 0) {
+                int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
+                if (selectedIndex >= 0) {
                     tableViewContextMenu.show(tableView, e.getScreenX(), e.getScreenY());
-                    deleteMenuItem.getProperties().put(SELECTED_INDEX, tableView.getSelectionModel().getSelectedIndex());
+                    deleteMenuItem.getProperties().put(SELECTED_INDEX, selectedIndex);
                 }
             }
+            if (e.getButton() == MouseButton.PRIMARY || e.getButton() == MouseButton.SECONDARY) {
+                //Reset states of all other annotations
+                for (Annotation a : bm.getAnnotationList()){
+                    new AnnotationMouseDefaultState().changeEffects(a);
+                }
+                //Higlight selected annotation
+                int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
+                ObservableList<Annotation> aList = bm.getAnnotationList();
+                Annotation a = aList.get(selectedIndex);
+                new AnnotationTableRowSelectedState().changeEffects(a);
+                //System.out.println("State changed");
+                bm.setAnnotationList(bm.getAnnotationList());
+            }
+            
         });
+
 
         TableColumn<Annotation, String> symbolColumn = new TableColumn<>("Annotation");
         symbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
@@ -110,11 +138,6 @@ public class MainController extends Application implements Controller {
 
         tableView.getColumns().addAll(symbolColumn, descriptionColumn);
         borderPane.setRight(tableView);
-
-        primaryStage.setScene(new Scene(borderPane));
-        primaryStage.setTitle(configBean.getMainFrameTitle());
-        primaryStage.show();
-
     }
 
     private void setUpMenuBar(BorderPane borderPane) {
@@ -136,7 +159,14 @@ public class MainController extends Application implements Controller {
             }
         });
         redoMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
-            BeanManager.createInstance().setAnnotationList(urm.redo());
+            ObservableList<Annotation> redoList2 = urm.redo();
+            for (Annotation a : redoList2) {
+                setUpAnnotationCircleMouseEvents(a);
+                setUpEditingPropertyListeners(a);
+            }
+
+            BeanManager.createInstance().setAnnotationList(redoList2);
+
         });
 
         MenuItem undoMenuItem = new MenuItem("undo");
@@ -151,7 +181,7 @@ public class MainController extends Application implements Controller {
         });
         undoMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
             bm.setAnnotationList(urm.undo());
-            for(Annotation a : bm.getAnnotationList()){
+            for (Annotation a : bm.getAnnotationList()) {
                 setUpAnnotationCircleMouseEvents(a);
             }
         });
@@ -170,14 +200,26 @@ public class MainController extends Application implements Controller {
                     List<? extends Annotation> addedList = c.getAddedSubList();
                     addedList.stream().forEach((a) -> {
                         a.getProperties().put(Annotation.GROUP_NODE, createViewGroupNode(a));
-                        imagePane.getChildren().add((Node)a.getProperties().get(Annotation.GROUP_NODE));
+                        imagePane.getChildren().add((Node) a.getProperties().get(Annotation.GROUP_NODE));
                     });
                 }
                 if (c.wasRemoved()) {
                     List<? extends Annotation> removedList = c.getRemoved();
                     removedList.stream().forEach((a) -> {
-                        imagePane.getChildren().remove((Node)a.getProperties().get(Annotation.GROUP_NODE));
+                        imagePane.getChildren().remove((Node) a.getProperties().get(Annotation.GROUP_NODE));
                     });
+
+                    //Remove all nodes
+                    for (Annotation a : c.getList()) {
+                        imagePane.getChildren().remove((Node) a.getProperties().get(Annotation.GROUP_NODE));
+                    }
+
+                    //Reletter list and display new modified list on screen
+                    Utilities.reLetter(bm.getAnnotationList());
+                    for (Annotation a : c.getList()) {
+                        a.getProperties().put(Annotation.GROUP_NODE, createViewGroupNode(a));
+                        imagePane.getChildren().add((Node) a.getProperties().get(Annotation.GROUP_NODE));
+                    }
                 }
             }
         });
@@ -192,12 +234,11 @@ public class MainController extends Application implements Controller {
     @Override
     public void createAndDisplayAnnotation(Rectangle r) {
         if (r.getWidth() > 10 && r.getHeight() > 10) {
-            bm.setAnnotationList(Utilities.reLetter(bm.getAnnotationList()));
-            for (Annotation a1 : bm.getAnnotationList()) {
-                setUpAnnotationCircleMouseEvents(a1);
-            }
+            ObservableList<Annotation> aList = bm.getAnnotationList();
+            bm.setAnnotationList(Utilities.reLetter(aList));
             Annotation a2 = new Annotation(r.getX(), r.getY(), r.getWidth(), r.getHeight());
             setUpAnnotationCircleMouseEvents(a2);
+            setUpEditingPropertyListeners(a2);
             bm.addAnnotationToList(a2);
             //System.out.printf("Number of elements in list = %s", bm.getAnnotationList().size());
             urm.save(bm.getAnnotationList());
@@ -221,9 +262,11 @@ public class MainController extends Application implements Controller {
         aList.remove(indexToDelete);
         aList = bm.getAnnotationList();
         bm.setAnnotationList(Utilities.reLetter(aList));
-        for(Annotation a : bm.getAnnotationList()){
-            setUpAnnotationCircleMouseEvents(a);
-        }
+        /**
+         * for(Annotation a : bm.getAnnotationList()){
+         * setUpAnnotationCircleMouseEvents(a); }
+         *
+         */
         urm.save(aList);
     }
 
@@ -252,21 +295,23 @@ public class MainController extends Application implements Controller {
                 AnnotationEditingDialog aed = new AnnotationEditingDialog(a);
                 aed.show();
             }
-            if(e.getButton() == MouseButton.SECONDARY){
+            if (e.getButton() == MouseButton.SECONDARY) {
                 ContextMenu popupMenu = new ContextMenu();
                 MenuItem deleteMenu = new MenuItem("Delete");
                 deleteMenu.addEventHandler(ActionEvent.ACTION, me -> {
-                     bm.getAnnotationList().remove(a);
+                    bm.getAnnotationList().remove(a);
                 });
                 popupMenu.getItems().add(deleteMenu);
                 popupMenu.show(imagePane, e.getScreenX(), e.getScreenY());
-               
+
             }
         });
     }
 
     /**
-     * Creates a single consolidated node that represents the view of the annotation
+     * Creates a single consolidated node that represents the view of the
+     * annotation
+     *
      * @param a
      * @return The node to display an annotation
      */
@@ -285,5 +330,17 @@ public class MainController extends Application implements Controller {
         text.yProperty().bind(a.getCircle().centerYProperty().add(5));
         return text;
     }
+
+    private void setUpEditingPropertyListeners(Annotation a) {
+        a.descriptionProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                bm.setAnnotationList(bm.getAnnotationList());
+            }
+        });
+    }
+    
+    
 
 }
