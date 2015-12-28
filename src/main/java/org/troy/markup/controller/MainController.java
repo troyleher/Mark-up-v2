@@ -5,7 +5,6 @@
  */
 package org.troy.markup.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Application;
 import javafx.collections.ListChangeListener;
@@ -40,7 +39,6 @@ import org.troy.markup.state.AnnotationMouseDefaultState;
 import org.troy.markup.state.AnnotationMouseEnteredState;
 import org.troy.markup.utilities.Utilities;
 import org.troy.markup.view.AnnotationEditingDialog;
-import org.troy.markup.view.AnnotationText;
 import org.troy.markup.view.ImageView;
 
 /**
@@ -153,6 +151,9 @@ public class MainController extends Application implements Controller {
         });
         undoMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
             bm.setAnnotationList(urm.undo());
+            for(Annotation a : bm.getAnnotationList()){
+                setUpAnnotationCircleMouseEvents(a);
+            }
         });
         editMenu.getItems().addAll(redoMenuItem, undoMenuItem);
         menuBar.getMenus().add(editMenu);
@@ -220,6 +221,9 @@ public class MainController extends Application implements Controller {
         aList.remove(indexToDelete);
         aList = bm.getAnnotationList();
         bm.setAnnotationList(Utilities.reLetter(aList));
+        for(Annotation a : bm.getAnnotationList()){
+            setUpAnnotationCircleMouseEvents(a);
+        }
         urm.save(aList);
     }
 
@@ -245,8 +249,18 @@ public class MainController extends Application implements Controller {
         });
         circle.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getClickCount() == 2) {
-                AnnotationEditingDialog aed = new AnnotationEditingDialog();
+                AnnotationEditingDialog aed = new AnnotationEditingDialog(a);
                 aed.show();
+            }
+            if(e.getButton() == MouseButton.SECONDARY){
+                ContextMenu popupMenu = new ContextMenu();
+                MenuItem deleteMenu = new MenuItem("Delete");
+                deleteMenu.addEventHandler(ActionEvent.ACTION, me -> {
+                     bm.getAnnotationList().remove(a);
+                });
+                popupMenu.getItems().add(deleteMenu);
+                popupMenu.show(imagePane, e.getScreenX(), e.getScreenY());
+               
             }
         });
     }
@@ -261,7 +275,7 @@ public class MainController extends Application implements Controller {
     }
 
     private Text createTextNode(Annotation a) {
-        Text text = new AnnotationText(a.getSymbol());
+        Text text = new Text(a.getSymbol());
         text.xProperty().bind(a.getCircle().centerXProperty().subtract(+5));
         text.yProperty().bind(a.getCircle().centerYProperty().add(5));
         return text;
