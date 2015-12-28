@@ -169,7 +169,7 @@ public class MainController extends Application implements Controller {
                 if (c.wasAdded()) {
                     List<? extends Annotation> addedList = c.getAddedSubList();
                     addedList.stream().forEach((a) -> {
-                        a.getProperties().put(Annotation.GROUP_NODE, getDisplableNode(a));
+                        a.getProperties().put(Annotation.GROUP_NODE, createViewGroupNode(a));
                         imagePane.getChildren().add((Node)a.getProperties().get(Annotation.GROUP_NODE));
                     });
                 }
@@ -265,7 +265,12 @@ public class MainController extends Application implements Controller {
         });
     }
 
-    private Node getDisplableNode(Annotation a) {
+    /**
+     * Creates a single consolidated node that represents the view of the annotation
+     * @param a
+     * @return The node to display an annotation
+     */
+    private Node createViewGroupNode(Annotation a) {
         Group group = new Group();
         ObservableList<Node> children = group.getChildren();
         children.add(a.getRectangle());
