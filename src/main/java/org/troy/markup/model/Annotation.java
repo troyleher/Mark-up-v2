@@ -12,6 +12,9 @@ import javafx.collections.ObservableMap;
 import javafx.scene.input.MouseEvent;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.troy.markup.jaxb.AnnotationCircleXMLAdapter;
+import org.troy.markup.jaxb.AnnotationRectangleXMLAdapter;
 import org.troy.markup.memento.UndoRedoManager;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.state.AnnotationMouseDefaultState;
@@ -23,7 +26,6 @@ import org.troy.markup.utilities.AnnotationLetterFactory;
  *
  * @author Troy
  */
-@XmlRootElement
 public final class Annotation {
 
     private AnnotationCircleBean circle;
@@ -84,12 +86,17 @@ public final class Annotation {
     public AnnotationCircleBean getCircle() {
         return circle;
     }
+    @XmlJavaTypeAdapter(AnnotationCircleXMLAdapter.class)
     public void setCircle(AnnotationCircleBean acb){
         circle = acb;
     }
 
     public AnnotationRectangleBean getRectangle() {
         return rectangle;
+    }
+    @XmlJavaTypeAdapter(AnnotationRectangleXMLAdapter.class)
+    public void setRectangle(AnnotationRectangleBean arb){
+        rectangle = arb;
     }
 
     public String getSymbol() {

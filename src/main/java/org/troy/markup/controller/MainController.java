@@ -6,6 +6,8 @@
 package org.troy.markup.controller;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +46,7 @@ import org.troy.markup.memento.UndoRedoManager;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.AnnotationCircleBean;
+import org.troy.markup.model.Annotations;
 import org.troy.markup.model.BeanManager;
 import org.troy.markup.model.ConfigurationBean;
 import org.troy.markup.state.AnnotationMouseDefaultState;
@@ -165,10 +168,17 @@ public class MainController extends Application implements Controller {
                     config.getFileExtensions()));
             File fileToSave = fc.showSaveDialog(stage);
             try {
-                JAXBContext context = JAXBContext.newInstance(Annotation.class);
+                JAXBContext context = JAXBContext.newInstance(Annotations.class);
+
                 if (fileToSave.canWrite()) {
                     Marshaller marshaller = context.createMarshaller();
-                    marshaller.marshal(bm.getAnnotationList().get(0), fileToSave);
+                    // output pretty printed
+                    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                    
+                    //Create jaxb compatabile list
+                    Annotations annotations = new Annotations();
+                    annotations.setAnotations(bm.getAnnotationList());
+                    marshaller.marshal(annotations, fileToSave);
                 }
 
             } catch (JAXBException ex) {
