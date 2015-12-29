@@ -5,8 +5,11 @@
  */
 package org.troy.markup.model;
 
+import java.util.ArrayList;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -15,11 +18,12 @@ import javafx.beans.property.StringProperty;
 public class ConfigurationBean {
 
     private static ConfigurationBean configurationBean;
-    
-    
-    private StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
+
+     private StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
+    private ObservableList<String> specialCharList = FXCollections.observableArrayList(new ArrayList<String>());
 
     private ConfigurationBean() {
+        setUpSpecialCharList();
     }
 
     public static ConfigurationBean createInstance() {
@@ -27,6 +31,8 @@ public class ConfigurationBean {
             configurationBean = new ConfigurationBean();
         }
         return configurationBean;
+        
+        
     }
 
     /**
@@ -43,6 +49,18 @@ public class ConfigurationBean {
 
     public StringProperty mainFrameTitle() {
         return mainFrameTitle;
+    }
+
+    public ObservableList<String> getSpecialCharList() {
+        return specialCharList;
+    }
+
+    public void setSpecialCharList(ObservableList<String> specialCharList) {
+        this.specialCharList = specialCharList;
+    }
+    
+      private void setUpSpecialCharList() {
+        specialCharList.add("\u2300"); //Diameter
     }
 
 }

@@ -56,6 +56,7 @@ public class MainController extends Application implements Controller {
     private UndoRedoManager urm;
     private ContextMenu tableViewContextMenu;
     private MenuItem deleteMenuItem;
+    private TableView<Annotation> tableView;
 
     private final static String SELECTED_INDEX = "SELECTED_INDEX";
 
@@ -69,10 +70,8 @@ public class MainController extends Application implements Controller {
         bm = BeanManager.createInstance();
         urm = UndoRedoManagerImpl.getInstance();
         BorderPane borderPane = new BorderPane();
-
         imagePane = new AnchorPane();
         borderPane.setCenter(imagePane);
-
         setUpMenuBar(borderPane);
 
         //Load a sample image for development only
@@ -92,7 +91,7 @@ public class MainController extends Application implements Controller {
 
     private void setUpTableView(BorderPane borderPane) {
         //Load table view
-        TableView<Annotation> tableView = new TableView<>();
+        tableView = new TableView<>();
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         //Set up context menu for tableview
@@ -274,6 +273,8 @@ public class MainController extends Application implements Controller {
         AnnotationCircleBean circle = a.getCircle();
         circle.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
             new AnnotationMouseEnteredState().changeEffects(a);
+            tableView.getSelectionModel().clearAndSelect(bm.getAnnotationList().indexOf(a));
+            
         });
         circle.addEventFilter(MouseEvent.MOUSE_EXITED, e -> {
             new AnnotationMouseDefaultState().changeEffects(a);
@@ -293,6 +294,10 @@ public class MainController extends Application implements Controller {
         circle.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getClickCount() == 2) {
                 AnnotationEditingDialog aed = new AnnotationEditingDialog(a);
+               // System.out.println(e.getX());
+                //System.out.println(a.getRectangle().getX() + e.getX());
+                aed.getStage().setX(e.getScreenX() + a.getRectangle().getWidth() + 20) ;
+                aed.getStage().setY(e.getScreenY() + a.getRectangle().getHeight() + 20) ;
                 aed.show();
             }
             if (e.getButton() == MouseButton.SECONDARY) {
@@ -306,6 +311,7 @@ public class MainController extends Application implements Controller {
 
             }
         });
+        
     }
 
     /**

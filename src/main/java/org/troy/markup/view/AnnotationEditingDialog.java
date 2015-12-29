@@ -5,11 +5,17 @@
  */
 package org.troy.markup.view;
 
+import java.util.List;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -21,6 +27,7 @@ import javafx.stage.Stage;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.BeanManager;
+import org.troy.markup.model.ConfigurationBean;
 
 /**
  *
@@ -30,6 +37,7 @@ public class AnnotationEditingDialog {
 
     private Stage stage;
     private BeanManager bm = BeanManager.createInstance();
+    private IndexRange selectedIndexRange ;
 
     public AnnotationEditingDialog(Annotation a) {
 
@@ -39,10 +47,40 @@ public class AnnotationEditingDialog {
         gridPane.setPadding(new Insets(20, 20, 20, 20));
         gridPane.setAlignment(Pos.CENTER);
 
+        //editing fields
         Label editLabel = new Label("Desc");
         gridPane.add(editLabel, 0, 1);
         TextField editField = new TextField(a.getDescription());
         gridPane.add(editField, 1, 1, 2, 1);
+        
+        editField.addEventHandler(ActionEvent.ACTION, e -> {
+            save(a, editField);
+        });
+        editField.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if(!newValue){
+                selectedIndexRange = editField.getSelection();
+            }
+        });
+
+        //Special characters
+        HBox specialCharBox = new HBox();
+        specialCharBox.setAlignment(Pos.BASELINE_LEFT);
+        specialCharBox.setSpacing(10);
+        List<String> specialCharList = ConfigurationBean.createInstance().getSpecialCharList();
+        for (String character : specialCharList) {
+            Button b = new Button(character);
+            b.setPrefWidth(30);
+            b.addEventHandler(ActionEvent.ACTION, e -> {
+                String specialChar = ((Button) e.getSource()).getText();
+                editField.requestFocus();
+                editField.replaceText(selectedIndexRange, "");
+                editField.setText(editField.getText() + specialChar);
+                editField.positionCaret(editField.getText().length());
+            });
+            specialCharBox.getChildren().add(b);
+
+        }
+        gridPane.add(specialCharBox, 0, 0, 2, 1);
 
         //Set up buttons
         HBox buttonHBox = new HBox();
@@ -50,13 +88,14 @@ public class AnnotationEditingDialog {
         buttonHBox.setSpacing(10);
         Button saveButton = new Button("Save");
         Button cancelButton = new Button("Cancel");
+        cancelButton.addEventHandler(ActionEvent.ACTION, e -> {
+            stage.close();
+        });
 
         buttonHBox.getChildren().addAll(saveButton, cancelButton);
         gridPane.add(buttonHBox, 2, 2);
         saveButton.addEventFilter(ActionEvent.ACTION, e -> {
-            a.setDescription(editField.getText());
-            UndoRedoManagerImpl.getInstance().save(BeanManager.createInstance().getAnnotationList());
-            stage.close();
+            save(a, editField);
 
         });
         stage = new Stage();
@@ -66,8 +105,19 @@ public class AnnotationEditingDialog {
 
     }
 
+    private void save(Annotation a, TextField editField) {
+        a.setDescription(editField.getText());
+        UndoRedoManagerImpl.getInstance().save(BeanManager.createInstance().getAnnotationList());
+        stage.close();
+    }
+
     public void show() {
         stage.showAndWait();
     }
+
+    public Stage getStage() {
+        return stage;
+    }
+    
 
 }
