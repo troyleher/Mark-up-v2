@@ -6,6 +6,7 @@
 package org.troy.markup.model;
 
 import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -18,12 +19,15 @@ import javafx.collections.ObservableList;
 public class ConfigurationBean {
 
     private static ConfigurationBean configurationBean;
-
-     private StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
+    private StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
+    private StringProperty fileLocation = new SimpleStringProperty("");
+    private StringProperty initialDirectory = new SimpleStringProperty("C:\\");
     private ObservableList<String> specialCharList = FXCollections.observableArrayList(new ArrayList<String>());
+    private ObservableList<String> fileExtensions = FXCollections.observableArrayList(new ArrayList<String>());
 
     private ConfigurationBean() {
         setUpSpecialCharList();
+        fileExtensions.add("*.xml");
     }
 
     public static ConfigurationBean createInstance() {
@@ -31,13 +35,13 @@ public class ConfigurationBean {
             configurationBean = new ConfigurationBean();
         }
         return configurationBean;
-        
-        
+
     }
 
     /**
      * Return the title for the main stage of the Java FX application
-     * @return 
+     *
+     * @return
      */
     public String getMainFrameTitle() {
         return mainFrameTitle.get();
@@ -58,9 +62,34 @@ public class ConfigurationBean {
     public void setSpecialCharList(ObservableList<String> specialCharList) {
         this.specialCharList = specialCharList;
     }
-    
-      private void setUpSpecialCharList() {
+
+    private void setUpSpecialCharList() {
         specialCharList.add("\u2300"); //Diameter
+    }
+    
+    public String getFileLocation(){
+        return fileLocation.get();
+    }
+    public void setFileLocation(String fileLocation){
+        this.fileLocation.set(fileLocation);
+    }
+    public StringProperty fileLocationProperty(){
+        return fileLocation;
+    }
+    public String getInitialDirectory(){
+        return initialDirectory.get();
+    }
+    public void setInitialDirectory(String directoryLocation){
+        initialDirectory.set(directoryLocation);
+    }
+    public StringProperty initialDirectoryProperty(){
+        return initialDirectory;
+    }
+    public List<String> getFileExtensions(){
+        return fileExtensions;
+    }
+    public void setFileExtensions(List<String> fileExtensions){
+        this.fileExtensions = FXCollections.observableArrayList(fileExtensions);
     }
 
 }

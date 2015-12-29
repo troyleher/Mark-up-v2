@@ -10,7 +10,8 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.troy.markup.memento.UndoRedoManager;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.state.AnnotationMouseDefaultState;
@@ -22,6 +23,7 @@ import org.troy.markup.utilities.AnnotationLetterFactory;
  *
  * @author Troy
  */
+@XmlRootElement
 public final class Annotation {
 
     private AnnotationCircleBean circle;
@@ -29,9 +31,8 @@ public final class Annotation {
     private StringProperty symbol = new SimpleStringProperty(this, "symbol", null);
     private StringProperty description = new SimpleStringProperty(this, "description", "To be done.");
     private AnnotationMouseState annotationMouseState;
-    private Text symbolText;
     private ObservableMap<String, Object> properties = FXCollections.observableHashMap();
-    
+
     public static final String GROUP_NODE = "GROUP_NODE";
 
     private BeanManager bm = BeanManager.createInstance();
@@ -65,7 +66,7 @@ public final class Annotation {
         circle = new AnnotationCircleBean(xPos - 10, yPos - 10, 10);
     }
 
-     private void setUpAnnotationCircle(double xPos, double yPos, double radius) {
+    private void setUpAnnotationCircle(double xPos, double yPos, double radius) {
         circle = new AnnotationCircleBean(xPos, yPos, radius);
     }
 
@@ -82,6 +83,9 @@ public final class Annotation {
 
     public AnnotationCircleBean getCircle() {
         return circle;
+    }
+    public void setCircle(AnnotationCircleBean acb){
+        circle = acb;
     }
 
     public AnnotationRectangleBean getRectangle() {
@@ -100,6 +104,7 @@ public final class Annotation {
         return annotationMouseState;
     }
 
+    @XmlTransient
     public void setAnnotationMouseState(AnnotationMouseState annotationMouseState) {
         this.annotationMouseState = annotationMouseState;
     }
@@ -112,27 +117,17 @@ public final class Annotation {
         this.description.set(description);
     }
 
-    public StringProperty descriptionProperty(){
+    public StringProperty descriptionProperty() {
         return description;
-    }
-    public Text getSymbolText() {
-        return symbolText;
-    }
-
-    public void setSymbolText(Text symbolText) {
-        this.symbolText = symbolText;
     }
 
     public ObservableMap<String, Object> getProperties() {
         return properties;
     }
 
+    @XmlTransient
     public void setProperties(ObservableMap<String, Object> properties) {
         this.properties = properties;
     }
-    
-    
-
-    
 
 }

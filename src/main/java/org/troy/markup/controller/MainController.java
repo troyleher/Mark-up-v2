@@ -5,7 +5,10 @@
  */
 package org.troy.markup.controller;
 
+import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -15,6 +18,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -30,7 +34,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javax.xml.bind.JAXB;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import org.troy.markup.memento.UndoRedoManager;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
@@ -72,7 +81,7 @@ public class MainController extends Application implements Controller {
         BorderPane borderPane = new BorderPane();
         imagePane = new AnchorPane();
         borderPane.setCenter(imagePane);
-        setUpMenuBar(borderPane);
+        setUpMenuBar(borderPane, primaryStage);
 
         //Load a sample image for development only
         Image image = new Image("/images/test.png");
@@ -113,7 +122,7 @@ public class MainController extends Application implements Controller {
             }
             if (e.getButton() == MouseButton.PRIMARY || e.getButton() == MouseButton.SECONDARY) {
                 //Reset states of all other annotations
-                for (Annotation a : bm.getAnnotationList()){
+                for (Annotation a : bm.getAnnotationList()) {
                     new AnnotationMouseDefaultState().changeEffects(a);
                 }
                 //Higlight selected annotation
@@ -124,9 +133,8 @@ public class MainController extends Application implements Controller {
                 //System.out.println("State changed");
                 bm.setAnnotationList(bm.getAnnotationList());
             }
-            
-        });
 
+        });
 
         TableColumn<Annotation, String> symbolColumn = new TableColumn<>("Annotation");
         symbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
@@ -139,12 +147,42 @@ public class MainController extends Application implements Controller {
         borderPane.setRight(tableView);
     }
 
-    private void setUpMenuBar(BorderPane borderPane) {
+    private void setUpMenuBar(BorderPane borderPane, Stage stage) {
         //Set up and menu bar
         MenuBar menuBar = new MenuBar();
 
         Menu fileMenu = new Menu("File");
         menuBar.getMenus().add(fileMenu);
+
+        MenuItem saveMenuItem = new MenuItem("Save");
+        fileMenu.getItems().add(saveMenuItem);
+
+        saveMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
+            ConfigurationBean config = ConfigurationBean.createInstance();
+            FileChooser fc = new FileChooser();
+            fc.setInitialDirectory(new File(config.getInitialDirectory()));
+            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
+                    config.getFileExtensions()));
+            File fileToSave = fc.showSaveDialog(stage);
+            try {
+                JAXBContext context = JAXBContext.newInstance(Annotation.class);
+                if (fileToSave.canWrite()) {
+                    Marshaller marshaller = context.createMarshaller();
+                    marshaller.marshal(bm.getAnnotationList().get(0), fileToSave);
+                }
+
+            } catch (JAXBException ex) {
+                Alert errorDialog = new Alert(Alert.AlertType.ERROR);
+                errorDialog.setContentText("An error occured trying to save file");
+                errorDialog.showAndWait();
+                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NullPointerException npe) {
+                Alert errorDialog = new Alert(Alert.AlertType.ERROR);
+                errorDialog.setContentText("No file selected");
+                errorDialog.showAndWait();
+                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, npe);
+            }
+        });
 
         Menu editMenu = new Menu("Edit");
         MenuItem redoMenuItem = new MenuItem("redo");
@@ -274,7 +312,7 @@ public class MainController extends Application implements Controller {
         circle.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
             new AnnotationMouseEnteredState().changeEffects(a);
             tableView.getSelectionModel().clearAndSelect(bm.getAnnotationList().indexOf(a));
-            
+
         });
         circle.addEventFilter(MouseEvent.MOUSE_EXITED, e -> {
             new AnnotationMouseDefaultState().changeEffects(a);
@@ -294,10 +332,10 @@ public class MainController extends Application implements Controller {
         circle.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getClickCount() == 2) {
                 AnnotationEditingDialog aed = new AnnotationEditingDialog(a);
-               // System.out.println(e.getX());
+                // System.out.println(e.getX());
                 //System.out.println(a.getRectangle().getX() + e.getX());
-                aed.getStage().setX(e.getScreenX() + a.getRectangle().getWidth() + 20) ;
-                aed.getStage().setY(e.getScreenY() + a.getRectangle().getHeight() + 20) ;
+                aed.getStage().setX(e.getScreenX() + a.getRectangle().getWidth() + 20);
+                aed.getStage().setY(e.getScreenY() + a.getRectangle().getHeight() + 20);
                 aed.show();
             }
             if (e.getButton() == MouseButton.SECONDARY) {
@@ -311,7 +349,7 @@ public class MainController extends Application implements Controller {
 
             }
         });
-        
+
     }
 
     /**
@@ -346,7 +384,5 @@ public class MainController extends Application implements Controller {
             }
         });
     }
-    
-    
 
 }
