@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -42,6 +43,7 @@ import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import org.troy.markup.memento.UndoRedoManager;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
@@ -97,6 +99,8 @@ public class MainController extends Application implements Controller {
 
         primaryStage.setScene(new Scene(borderPane));
         primaryStage.setTitle(configBean.getMainFrameTitle());
+        primaryStage.titleProperty().bind(configBean.mainFrameTitle().
+                concat(" ").concat(configBean.fileLocationProperty()));
         primaryStage.show();
 
     }
@@ -157,28 +161,68 @@ public class MainController extends Application implements Controller {
         Menu fileMenu = new Menu("File");
         menuBar.getMenus().add(fileMenu);
 
+        //Open Menu
+        MenuItem openMenuItem = new MenuItem("Open...");
+        fileMenu.getItems().add(openMenuItem);
+        openMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
+            try {
+                ConfigurationBean config = ConfigurationBean.createInstance();
+                FileChooser fc = new FileChooser();
+                fc.setInitialDirectory(new File(config.getInitialDirectory()));
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
+                        config.getFileExtensions()));
+                File file = fc.showOpenDialog(stage);
+                if (file == null) {
+                    return;
+                }
+                JAXBContext context = JAXBContext.newInstance(Annotations.class);
+                Unmarshaller m = context.createUnmarshaller();
+                Annotations annotations = (Annotations) m.unmarshal(file);
+                ObservableList<Annotation> aList = FXCollections.observableArrayList(annotations.getAnotations());
+                for (Annotation a : aList) {
+                    setUpAnnotationCircleMouseEvents(a);
+                    setUpEditingPropertyListeners(a);
+                    new AnnotationMouseDefaultState().changeEffects(a);
+                }
+                bm.setAnnotationList(aList);
+                //System.out.println(file.getParent());
+                config.setInitialDirectory(file.getParent());
+                config.setInitialFileName(file.getName());
+                
+            } catch (JAXBException ex) {
+                Alert errorDialog = new Alert(Alert.AlertType.ERROR);
+                errorDialog.setContentText("An error occured trying to open the file");
+                errorDialog.showAndWait();
+                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        });
+
+        //Save Menu
         MenuItem saveMenuItem = new MenuItem("Save");
         fileMenu.getItems().add(saveMenuItem);
-
         saveMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
             ConfigurationBean config = ConfigurationBean.createInstance();
             FileChooser fc = new FileChooser();
             fc.setInitialDirectory(new File(config.getInitialDirectory()));
+            fc.setInitialFileName(config.getInitialFileName());
             fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
                     config.getFileExtensions()));
             File fileToSave = fc.showSaveDialog(stage);
             try {
                 JAXBContext context = JAXBContext.newInstance(Annotations.class);
-
+                if (fileToSave == null) {
+                    return;
+                }
                 if (fileToSave.canWrite()) {
                     Marshaller marshaller = context.createMarshaller();
                     // output pretty printed
                     marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                    
                     //Create jaxb compatabile list
                     Annotations annotations = new Annotations();
                     annotations.setAnotations(bm.getAnnotationList());
                     marshaller.marshal(annotations, fileToSave);
+                    
                 }
 
             } catch (JAXBException ex) {
@@ -186,11 +230,6 @@ public class MainController extends Application implements Controller {
                 errorDialog.setContentText("An error occured trying to save file");
                 errorDialog.showAndWait();
                 Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NullPointerException npe) {
-                Alert errorDialog = new Alert(Alert.AlertType.ERROR);
-                errorDialog.setContentText("No file selected");
-                errorDialog.showAndWait();
-                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, npe);
             }
         });
 
@@ -239,7 +278,7 @@ public class MainController extends Application implements Controller {
 
     private void setUpChangeListenerForChangingList() {
         //Set up listener for annotation list
-        //TODO 
+ 
         ObservableList<Annotation> aList = bm.getAnnotationList();
         aList.addListener((ListChangeListener.Change<? extends Annotation> c) -> {
             if (c.next()) {

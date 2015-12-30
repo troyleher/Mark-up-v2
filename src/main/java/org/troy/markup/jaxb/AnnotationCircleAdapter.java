@@ -15,6 +15,7 @@ public class AnnotationCircleAdapter {
     private double xPos;
     private double yPos;
     private double radius;
+    public  AnnotationCircleAdapter(){}
     public AnnotationCircleAdapter(AnnotationCircleBean acb){
         xPos = acb.getCenterX();
         yPos = acb.getCenterY();

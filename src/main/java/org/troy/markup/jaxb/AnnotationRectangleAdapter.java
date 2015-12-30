@@ -17,6 +17,7 @@ public class AnnotationRectangleAdapter {
     private double width;
     private double height;
     
+    public AnnotationRectangleAdapter(){}
     public AnnotationRectangleAdapter(AnnotationRectangleBean arb){
         xPos = arb.getX();
         yPos = arb.getY();

@@ -19,9 +19,9 @@ import javafx.collections.ObservableList;
 public class ConfigurationBean {
 
     private static ConfigurationBean configurationBean;
-    private StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
-    private StringProperty fileLocation = new SimpleStringProperty("");
-    private StringProperty initialDirectory = new SimpleStringProperty("C:\\");
+    private final StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
+    private final StringProperty initialFileName = new SimpleStringProperty("untitled.xml");
+    private final StringProperty initialDirectory = new SimpleStringProperty("C:\\");
     private ObservableList<String> specialCharList = FXCollections.observableArrayList(new ArrayList<String>());
     private ObservableList<String> fileExtensions = FXCollections.observableArrayList(new ArrayList<String>());
 
@@ -67,14 +67,14 @@ public class ConfigurationBean {
         specialCharList.add("\u2300"); //Diameter
     }
     
-    public String getFileLocation(){
-        return fileLocation.get();
+    public String getInitialFileName(){
+        return initialFileName.get();
     }
-    public void setFileLocation(String fileLocation){
-        this.fileLocation.set(fileLocation);
+    public void setInitialFileName(String fileLocation){
+        this.initialFileName.set(fileLocation);
     }
     public StringProperty fileLocationProperty(){
-        return fileLocation;
+        return initialFileName;
     }
     public String getInitialDirectory(){
         return initialDirectory.get();
