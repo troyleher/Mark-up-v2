@@ -181,7 +181,7 @@ public class MainController extends Application implements Controller {
                 ObservableList<Annotation> aList = FXCollections.observableArrayList(annotations.getAnotations());
                 for (Annotation a : aList) {
                     setUpAnnotationCircleMouseEvents(a);
-                    setUpEditingPropertyListeners(a);
+                    //setUpEditingPropertyListeners(a);
                     new AnnotationMouseDefaultState().changeEffects(a);
                 }
                 bm.setAnnotationList(aList);
@@ -214,6 +214,9 @@ public class MainController extends Application implements Controller {
                 if (fileToSave == null) {
                     return;
                 }
+                if(!fileToSave.exists()){
+                    fileToSave.createNewFile();
+                }
                 if (fileToSave.canWrite()) {
                     Marshaller marshaller = context.createMarshaller();
                     // output pretty printed
@@ -225,7 +228,7 @@ public class MainController extends Application implements Controller {
                     
                 }
 
-            } catch (JAXBException ex) {
+            } catch (Exception ex) {
                 Alert errorDialog = new Alert(Alert.AlertType.ERROR);
                 errorDialog.setContentText("An error occured trying to save file");
                 errorDialog.showAndWait();
@@ -248,7 +251,7 @@ public class MainController extends Application implements Controller {
             ObservableList<Annotation> redoList2 = urm.redo();
             for (Annotation a : redoList2) {
                 setUpAnnotationCircleMouseEvents(a);
-                setUpEditingPropertyListeners(a);
+                //setUpEditingPropertyListeners(a);
             }
 
             BeanManager.createInstance().setAnnotationList(redoList2);
@@ -289,7 +292,7 @@ public class MainController extends Application implements Controller {
                         imagePane.getChildren().add((Node) a.getProperties().get(Annotation.GROUP_NODE));
                     });
                 }
-                if (c.wasRemoved()) {
+                if (c.wasRemoved() || c.wasAdded()) {
                     List<? extends Annotation> removedList = c.getRemoved();
                     removedList.stream().forEach((a) -> {
                         imagePane.getChildren().remove((Node) a.getProperties().get(Annotation.GROUP_NODE));
@@ -324,7 +327,7 @@ public class MainController extends Application implements Controller {
             bm.setAnnotationList(Utilities.reLetter(aList));
             Annotation a2 = new Annotation(r.getX(), r.getY(), r.getWidth(), r.getHeight());
             setUpAnnotationCircleMouseEvents(a2);
-            setUpEditingPropertyListeners(a2);
+            //setUpEditingPropertyListeners(a2);
             bm.addAnnotationToList(a2);
             //System.out.printf("Number of elements in list = %s", bm.getAnnotationList().size());
             urm.save(bm.getAnnotationList());
@@ -424,6 +427,7 @@ public class MainController extends Application implements Controller {
         return text;
     }
 
+    /**
     private void setUpEditingPropertyListeners(Annotation a) {
         a.descriptionProperty().addListener(new ChangeListener<String>() {
 
@@ -433,5 +437,6 @@ public class MainController extends Application implements Controller {
             }
         });
     }
+    **/
 
 }

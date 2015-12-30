@@ -106,6 +106,9 @@ public final class Annotation {
     public void setSymbol(String symbol) {
         this.symbol.set(symbol);
     }
+    public StringProperty symbolProperty(){
+        return symbol;
+    }
 
     public AnnotationMouseState getAnnotationMouseState() {
         return annotationMouseState;
