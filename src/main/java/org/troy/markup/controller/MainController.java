@@ -7,6 +7,7 @@ package org.troy.markup.controller;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -16,11 +17,13 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -43,27 +46,20 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import org.troy.markup.memento.UndoRedoManager;
-import org.troy.markup.memento.UndoRedoManagerImpl;
-import org.troy.markup.model.Annotation;
-import org.troy.markup.model.AnnotationCircleBean;
-import org.troy.markup.model.Annotations;
-import org.troy.markup.model.BeanManager;
-import org.troy.markup.model.ConfigurationBean;
-import org.troy.markup.state.AnnotationMouseDefaultState;
-import org.troy.markup.state.AnnotationMouseEnteredState;
-import org.troy.markup.state.AnnotationTableRowSelectedState;
+import org.troy.markup.memento.*;
+import org.troy.markup.model.*;
+import org.troy.markup.state.*;
 import org.troy.markup.utilities.Utilities;
-import org.troy.markup.view.AnnotationEditingDialog;
-import org.troy.markup.view.ImageView;
+import org.troy.markup.view.*;
 
 /**
- *
  * @author Troy
  */
 public class MainController extends Application implements Controller {
@@ -76,6 +72,7 @@ public class MainController extends Application implements Controller {
     private MenuItem deleteMenuItem;
     private TableView<Annotation> tableView;
     private ConfigurationBean configBean;
+    private boolean fileHasChanged = false;
 
     private final static String SELECTED_INDEX = "SELECTED_INDEX";
 
@@ -88,6 +85,36 @@ public class MainController extends Application implements Controller {
         configBean = ConfigurationBean.createInstance();
         bm = BeanManager.createInstance();
         urm = UndoRedoManagerImpl.getInstance();
+        primaryStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> {
+            if (fileHasChanged) {
+                //Ask if user would like to save the file
+                Alert shouldSave = new Alert(Alert.AlertType.WARNING);
+                shouldSave.setContentText("Save changes?");
+                shouldSave.getButtonTypes().clear();
+                shouldSave.getButtonTypes().add(ButtonType.YES);
+                shouldSave.getButtonTypes().add(ButtonType.NO);
+                Optional<ButtonType> result = shouldSave.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    displaySaveFileChooser(primaryStage);
+                } else {
+
+                }
+                shouldSave.close();
+
+            }
+        });
+        displayWelcomeWindow(primaryStage);
+    }
+
+    private void displayWelcomeWindow(Stage primaryStage) {
+        SystemConfigWrapper scw = null;
+        try {
+            JAXBContext context = JAXBContext.newInstance(SystemConfigWrapper.class);
+            Unmarshaller unMarshaller = context.createUnmarshaller();
+            scw = (SystemConfigWrapper) unMarshaller.unmarshal(MainController.class.getResource("/system/recentFiles.xml"));
+        } catch (JAXBException ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         //Display inner dialog with new button  or list of previous files
         BorderPane borderPane1 = new BorderPane();
@@ -97,8 +124,11 @@ public class MainController extends Application implements Controller {
         gridPane.setVgap(5);
         gridPane.setHgap(5);
         gridPane.setPadding(new Insets(20, 20, 20, 20));
+        ObservableList<String> list = null;
+        if (scw != null) {
+            list = scw.getRecentFileList();
+        }
 
-        ObservableList<String> list = FXCollections.<String>observableArrayList("Test1", "Test2", "Test3");
         ListView<String> listView = new ListView<>(list);
         listView.setMaxHeight(150);
         gridPane.add(listView, 0, 0, 1, 1);
@@ -114,6 +144,15 @@ public class MainController extends Application implements Controller {
         buttonHBox.setAlignment(Pos.BASELINE_RIGHT);
         Button newButton = new Button("New...");
         Button openButton = new Button("Open");
+        openButton.addEventHandler(ActionEvent.ACTION, e -> {
+            try {
+                displayOpenFileChooser(primaryStage);
+                displayMainWindow(primaryStage);
+            } catch (JAXBException ex) {
+                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+
         buttonHBox.getChildren().addAll(newButton, openButton);
 
         gridPane.add(buttonHBox, 0, 1, 3, 1);
@@ -121,20 +160,19 @@ public class MainController extends Application implements Controller {
         Rectangle border = new Rectangle(0, 0, 500, 400);
         border.setFill(Color.LIGHTBLUE);
         border.setStrokeWidth(5);
-        border.setStroke(Color.BLACK);
+        border.setStroke(Color.GRAY);
 
         stackPane.setAlignment(Pos.CENTER);
         stackPane.getChildren().addAll(border, gridPane);
 
         borderPane1.setCenter(stackPane);
         primaryStage.setScene(new Scene(borderPane1));
- 
+
         primaryStage.setTitle(configBean.getMainFrameTitle());
         primaryStage.show();
-
     }
 
-    private void setUpMainWindow(Stage primaryStage) {
+    private void displayMainWindow(Stage primaryStage) {
         javafx.scene.image.ImageView imageView;
         BorderPane borderPane = new BorderPane();
         imagePane = new AnchorPane();
@@ -147,13 +185,18 @@ public class MainController extends Application implements Controller {
         imageView = new ImageView(image, this);
         imagePane.getChildren().add(imageView);
         setUpChangeListenerForChangingList();
+        setUpAnnotationViewNodes(bm.getAnnotationList());
         setUpTableView(borderPane);
         primaryStage.setScene(new Scene(borderPane));
         Font.loadFont(MainController.class.getResource("/fonts/FreeSerif.ttf").toExternalForm(), 10);
         primaryStage.setTitle(configBean.getMainFrameTitle());
         primaryStage.titleProperty().bind(configBean.mainFrameTitle().
                 concat(" ").concat(configBean.fileLocationProperty()));
+        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+        primaryStage.setX((primScreenBounds.getWidth() - primaryStage.getWidth()) / 2);
+        primaryStage.setY((primScreenBounds.getHeight() - primaryStage.getHeight()) / 2);
         primaryStage.show();
+
     }
 
     private void setUpTableView(BorderPane borderPane) {
@@ -161,11 +204,10 @@ public class MainController extends Application implements Controller {
         tableView = new TableView<>();
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        //Set up context menu for tableview
+        //Set up context menu for table view
         tableViewContextMenu = new ContextMenu();
         deleteMenuItem = new MenuItem("Delete");
         deleteMenuItem.addEventHandler(ActionEvent.ACTION, this::deleteButtonAction);
-
         tableViewContextMenu.getItems().add(deleteMenuItem);
         tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
@@ -191,9 +233,7 @@ public class MainController extends Application implements Controller {
                 //System.out.println("State changed");
                 bm.setAnnotationList(bm.getAnnotationList());
             }
-
         });
-
         TableColumn<Annotation, String> symbolColumn = new TableColumn<>("Annotation");
         symbolColumn.setCellValueFactory(new PropertyValueFactory<>("symbol"));
 
@@ -218,28 +258,7 @@ public class MainController extends Application implements Controller {
         fileMenu.getItems().add(openMenuItem);
         openMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
             try {
-                ConfigurationBean config = ConfigurationBean.createInstance();
-                FileChooser fc = new FileChooser();
-                fc.setInitialDirectory(new File(config.getInitialDirectory()));
-                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
-                        config.getFileExtensions()));
-                File file = fc.showOpenDialog(stage);
-                if (file == null) {
-                    return;
-                }
-                JAXBContext context = JAXBContext.newInstance(Annotations.class);
-                Unmarshaller m = context.createUnmarshaller();
-                Annotations annotations = (Annotations) m.unmarshal(file);
-                ObservableList<Annotation> aList = FXCollections.observableArrayList(annotations.getAnotations());
-                for (Annotation a : aList) {
-                    setUpAnnotationCircleMouseEvents(a);
-                    //setUpEditingPropertyListeners(a);
-                    new AnnotationMouseDefaultState().changeEffects(a);
-                }
-                bm.setAnnotationList(aList);
-                //System.out.println(file.getParent());
-                config.setInitialDirectory(file.getParent());
-                config.setInitialFileName(file.getName());
+                displayOpenFileChooser(stage);
 
             } catch (JAXBException ex) {
                 Alert errorDialog = new Alert(Alert.AlertType.ERROR);
@@ -254,40 +273,7 @@ public class MainController extends Application implements Controller {
         MenuItem saveMenuItem = new MenuItem("Save");
         fileMenu.getItems().add(saveMenuItem);
         saveMenuItem.addEventHandler(ActionEvent.ACTION, e -> {
-            ConfigurationBean config = ConfigurationBean.createInstance();
-            FileChooser fc = new FileChooser();
-            fc.setInitialDirectory(new File(config.getInitialDirectory()));
-            //System.out.println(config.getInitialDirectory()+config.getInitialFileName());
-            fc.setInitialFileName(config.getInitialFileName());
-            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
-                    config.getFileExtensions()));
-            File fileToSave = fc.showSaveDialog(stage);
-            try {
-                JAXBContext context = JAXBContext.newInstance(Annotations.class);
-                if (fileToSave == null) {
-                    return;
-                }
-                if (!fileToSave.exists()) {
-                    fileToSave.createNewFile();
-                }
-                if (fileToSave.canWrite()) {
-                    config.setInitialDirectory(fileToSave.getParent());
-                    Marshaller marshaller = context.createMarshaller();
-                    // output pretty printed
-                    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                    //Create jaxb compatabile list
-                    Annotations annotations = new Annotations();
-                    annotations.setAnotations(bm.getAnnotationList());
-                    marshaller.marshal(annotations, fileToSave);
-
-                }
-
-            } catch (Exception ex) {
-                Alert errorDialog = new Alert(Alert.AlertType.ERROR);
-                errorDialog.setContentText("An error occured trying to save file");
-                errorDialog.showAndWait();
-                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            displaySaveFileChooser(stage);
         });
 
         Menu editMenu = new Menu("Edit");
@@ -333,6 +319,89 @@ public class MainController extends Application implements Controller {
         borderPane.setTop(menuBar);
     }
 
+    private void displaySaveFileChooser(Stage stage) {
+        ConfigurationBean configBean = ConfigurationBean.createInstance();
+        FileChooser fc = new FileChooser();
+        fc.setInitialDirectory(new File(configBean.getInitialDirectory()));
+        //System.out.println(config.getInitialDirectory()+config.getInitialFileName());
+        fc.setInitialFileName(configBean.getInitialFileName());
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
+                configBean.getFileExtensions()));
+        File fileToSave = fc.showSaveDialog(stage);
+        try {
+            JAXBContext annotContext = JAXBContext.newInstance(Annotations.class);
+            JAXBContext systemContext = JAXBContext.newInstance(SystemConfigWrapper.class);
+          
+            if (fileToSave == null) {
+                return;
+            }
+            if (!fileToSave.exists()) {
+                fileToSave.createNewFile();
+            }
+            if (fileToSave.canWrite()) {
+                configBean.setInitialDirectory(fileToSave.getParent());
+                Marshaller marshaller = annotContext.createMarshaller();
+                // output pretty printed
+                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                //Create jaxb compatabile list
+                Annotations annotations = new Annotations();
+                annotations.setAnotations(bm.getAnnotationList());
+                marshaller.marshal(annotations, fileToSave);
+                fileHasChanged = false;
+                
+                
+                //Add saved file name to list of saved files
+                SystemConfigWrapper scw = SystemConfigWrapper.createInstance();
+                ObservableList<String> recentFileList = scw.getRecentFileList();
+                String fileName = configBean.getInitialDirectory() + configBean.getInitialFileName();
+                //Remove matching fileName
+                if(recentFileList.contains(fileName)){
+                    recentFileList.remove(fileName);
+                }
+                if(recentFileList.size() == 10){
+                    recentFileList.remove(0);
+                }
+                
+                recentFileList.add(fileName);
+                Marshaller system = systemContext.createMarshaller();
+                File systemFile = new File(MainController.class.getResource("/system/recentFiles.xml").toURI());
+                system.marshal(scw, systemFile);
+
+            }
+
+        } catch (Exception ex) {
+            Alert errorDialog = new Alert(Alert.AlertType.ERROR);
+            errorDialog.setContentText("An error occured trying to save file");
+            errorDialog.showAndWait();
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void displayOpenFileChooser(Stage stage) throws JAXBException {
+        ConfigurationBean config = ConfigurationBean.createInstance();
+        FileChooser fc = new FileChooser();
+        fc.setInitialDirectory(new File(config.getInitialDirectory()));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
+                config.getFileExtensions()));
+        File file = fc.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
+        JAXBContext context = JAXBContext.newInstance(Annotations.class);
+        Unmarshaller m = context.createUnmarshaller();
+        Annotations annotations = (Annotations) m.unmarshal(file);
+        ObservableList<Annotation> aList = FXCollections.observableArrayList(annotations.getAnotations());
+        for (Annotation a : aList) {
+            setUpAnnotationCircleMouseEvents(a);
+            new AnnotationMouseDefaultState().changeEffects(a);
+
+        }
+        bm.setAnnotationList(aList);
+        //System.out.println(file.getParent());
+        config.setInitialDirectory(file.getParent());
+        config.setInitialFileName(file.getName());
+    }
+
     private void setUpChangeListenerForChangingList() {
         //Set up listener for annotation list
 
@@ -340,13 +409,10 @@ public class MainController extends Application implements Controller {
         aList.addListener((ListChangeListener.Change<? extends Annotation> c) -> {
             if (c.next()) {
                 if (c.wasAdded()) {
-                    List<? extends Annotation> addedList = c.getAddedSubList();
-                    addedList.stream().forEach((a) -> {
-                        a.getProperties().put(Annotation.GROUP_NODE, createViewGroupNode(a));
-                        imagePane.getChildren().add((Node) a.getProperties().get(Annotation.GROUP_NODE));
-                    });
+                    ObservableList<Annotation> addedList = FXCollections.observableArrayList(c.getAddedSubList());
+                    setUpAnnotationViewNodes(addedList);
                 }
-                if (c.wasRemoved() || c.wasAdded()) {
+                if (c.wasRemoved() || c.wasUpdated()) {
                     List<? extends Annotation> removedList = c.getRemoved();
                     removedList.stream().forEach((a) -> {
                         imagePane.getChildren().remove((Node) a.getProperties().get(Annotation.GROUP_NODE));
@@ -364,8 +430,17 @@ public class MainController extends Application implements Controller {
                         imagePane.getChildren().add((Node) a.getProperties().get(Annotation.GROUP_NODE));
                     }
                 }
+                fileHasChanged = true;
             }
         });
+    }
+
+    private void setUpAnnotationViewNodes(ObservableList<Annotation> aList) {
+        for (Annotation a : aList) {
+            a.getProperties().put(Annotation.GROUP_NODE, createViewGroupNode(a));
+            imagePane.getChildren().add((Node) a.getProperties().get(Annotation.GROUP_NODE));
+        }
+
     }
 
     /**
@@ -428,8 +503,10 @@ public class MainController extends Application implements Controller {
 
         });
         circle.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
+            circle.setCircleMoved(true);
             circle.setIsCirclePressed(false);
             urm.save(bm.getAnnotationList());
+            circle.setCircleMoved(false);
         });
         circle.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
             circle.setXPos(e.getX());
@@ -481,13 +558,4 @@ public class MainController extends Application implements Controller {
         return text;
     }
 
-    /**
-     * private void setUpEditingPropertyListeners(Annotation a) {
-     * a.descriptionProperty().addListener(new ChangeListener<String>() {
-     *
-     * @Override public void changed(ObservableValue<? extends String>
-     * observable, String oldValue, String newValue) {
-     * bm.setAnnotationList(bm.getAnnotationList()); } }); }
-     *
-     */
 }

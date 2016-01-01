@@ -5,6 +5,8 @@
  */
 package org.troy.markup.model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.shape.Circle;
 
 /**
@@ -14,6 +16,7 @@ import javafx.scene.shape.Circle;
 public class AnnotationCircleBean extends Circle{
     
     private boolean isCirclePressed = false;
+    private BooleanProperty circleMoved = new SimpleBooleanProperty(false);
     
     private AnnotationCircleBean(){}
     public AnnotationCircleBean(double xPos, double yPos, double radius){
@@ -55,7 +58,15 @@ public class AnnotationCircleBean extends Circle{
     public void setIsCirclePressed(boolean isCirclePressed) {
         this.isCirclePressed = isCirclePressed;
     }
-    
+    public void setCircleMoved(boolean moved){
+        circleMoved.set(moved);
+    }
+    public boolean getCircleMoved(){
+        return circleMoved.get();
+    }
+    public BooleanProperty circleMovedProperty(){
+        return  circleMoved;
+    }
     @Override
     public boolean equals(Object obj) {
         boolean isEqual = false;

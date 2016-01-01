@@ -26,7 +26,8 @@ public class BeanManager {
 
             @Override
             public Observable[] call(Annotation a) {
-               return new Observable[]{a.descriptionProperty(), a.symbolProperty()};
+               return new Observable[]{a.descriptionProperty(), a.symbolProperty(),
+                  a.getCircle().circleMovedProperty()};
             }
         
         });
