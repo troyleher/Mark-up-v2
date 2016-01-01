@@ -41,6 +41,7 @@ public class TestAnnotationLetterFactory {
 
     @Test
     public void testLetterCreation() {
+        AnnotationLetterFactory.setCurrentLetter(AnnotationLetterFactory.RESET);
         assertTrue(AnnotationLetterFactory.createLetter().equalsIgnoreCase("a"));
         assertTrue(AnnotationLetterFactory.createLetter().equalsIgnoreCase("b"));
         

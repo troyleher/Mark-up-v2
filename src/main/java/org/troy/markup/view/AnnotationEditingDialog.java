@@ -21,6 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -37,7 +38,8 @@ public class AnnotationEditingDialog {
 
     private Stage stage;
     private BeanManager bm = BeanManager.createInstance();
-    private IndexRange selectedIndexRange ;
+    private IndexRange selectedIndexRange;
+    private int caretPos ;
 
     public AnnotationEditingDialog(Annotation a) {
 
@@ -51,14 +53,19 @@ public class AnnotationEditingDialog {
         Label editLabel = new Label("Desc");
         gridPane.add(editLabel, 0, 1);
         TextField editField = new TextField(a.getDescription());
+        editField.setFont(new Font("FreeSerif", 15));
         gridPane.add(editField, 1, 1, 2, 1);
-        
+
         editField.addEventHandler(ActionEvent.ACTION, e -> {
             save(a, editField);
         });
         editField.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if(!newValue){
+            if (!newValue) {
                 selectedIndexRange = editField.getSelection();
+                caretPos = editField.getCaretPosition();
+                //System.out.println(selectedIndexRange);
+            }else{
+                
             }
         });
 
@@ -69,14 +76,21 @@ public class AnnotationEditingDialog {
         List<String> specialCharList = ConfigurationBean.createInstance().getSpecialCharList();
         for (String character : specialCharList) {
             Button b = new Button(character);
-            b.setPrefWidth(30);
+            b.setFont(new Font("FreeSerif", 12));
+            b.setMinWidth(30);
             b.addEventHandler(ActionEvent.ACTION, e -> {
                 String specialChar = ((Button) e.getSource()).getText();
                 editField.requestFocus();
-                editField.replaceText(selectedIndexRange, "");
-                editField.setText(editField.getText() + specialChar);
-                editField.positionCaret(editField.getText().length());
-            });
+                if((selectedIndexRange.getEnd()- selectedIndexRange.getStart()> 0)){
+                    editField.positionCaret(caretPos);
+                    editField.replaceText(selectedIndexRange, "");
+                    
+                }else{
+                    editField.positionCaret(caretPos);
+                
+                }
+                editField.insertText(editField.getCaretPosition(), specialChar);
+             });
             specialCharBox.getChildren().add(b);
 
         }
@@ -118,6 +132,5 @@ public class AnnotationEditingDialog {
     public Stage getStage() {
         return stage;
     }
-    
 
 }

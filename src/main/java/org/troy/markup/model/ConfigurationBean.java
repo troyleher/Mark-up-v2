@@ -21,7 +21,8 @@ public class ConfigurationBean {
     private static ConfigurationBean configurationBean;
     private final StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
     private final StringProperty initialFileName = new SimpleStringProperty("untitled.xml");
-    private final StringProperty initialDirectory = new SimpleStringProperty("C:\\");
+    private final StringProperty initialDirectory = new SimpleStringProperty("c:\\");
+    private final StringProperty imagePath = new SimpleStringProperty("C:\\test3.png");
     private ObservableList<String> specialCharList = FXCollections.observableArrayList(new ArrayList<String>());
     private ObservableList<String> fileExtensions = FXCollections.observableArrayList(new ArrayList<String>());
 
@@ -65,31 +66,54 @@ public class ConfigurationBean {
 
     private void setUpSpecialCharList() {
         specialCharList.add("\u2300"); //Diameter
+        specialCharList.add("\u27C2"); //Pependicular
+        specialCharList.add("\u2225"); //Paralell to
+        specialCharList.add("\u2104"); //Center line
+        specialCharList.add("\u00B1"); //Tolerance symbol
     }
-    
-    public String getInitialFileName(){
+
+    public String getInitialFileName() {
         return initialFileName.get();
     }
-    public void setInitialFileName(String fileLocation){
+
+    public void setInitialFileName(String fileLocation) {
         this.initialFileName.set(fileLocation);
     }
-    public StringProperty fileLocationProperty(){
+
+    public StringProperty fileLocationProperty() {
         return initialFileName;
     }
-    public String getInitialDirectory(){
+
+    public String getInitialDirectory() {
         return initialDirectory.get();
     }
-    public void setInitialDirectory(String directoryLocation){
+
+    public void setInitialDirectory(String directoryLocation) {
         initialDirectory.set(directoryLocation);
     }
-    public StringProperty initialDirectoryProperty(){
+
+    public StringProperty initialDirectoryProperty() {
         return initialDirectory;
     }
-    public List<String> getFileExtensions(){
+
+    public List<String> getFileExtensions() {
         return fileExtensions;
     }
-    public void setFileExtensions(List<String> fileExtensions){
+
+    public void setFileExtensions(List<String> fileExtensions) {
         this.fileExtensions = FXCollections.observableArrayList(fileExtensions);
+    }
+
+    public String getImagePath() {
+        return imagePath.get();
+    }
+
+    public void setImagePath(String path) {
+        imagePath.set(path);
+    }
+
+    public StringProperty imagePathProperty() {
+        return imagePath;
     }
 
 }

@@ -6,23 +6,23 @@
 package org.troy.markup.controller;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -34,12 +34,16 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -71,6 +75,7 @@ public class MainController extends Application implements Controller {
     private ContextMenu tableViewContextMenu;
     private MenuItem deleteMenuItem;
     private TableView<Annotation> tableView;
+    private ConfigurationBean configBean;
 
     private final static String SELECTED_INDEX = "SELECTED_INDEX";
 
@@ -80,29 +85,75 @@ public class MainController extends Application implements Controller {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        ConfigurationBean configBean = ConfigurationBean.createInstance();
+        configBean = ConfigurationBean.createInstance();
         bm = BeanManager.createInstance();
         urm = UndoRedoManagerImpl.getInstance();
+
+        //Display inner dialog with new button  or list of previous files
+        BorderPane borderPane1 = new BorderPane();
+        StackPane stackPane = new StackPane();
+        GridPane gridPane = new GridPane();
+
+        gridPane.setVgap(5);
+        gridPane.setHgap(5);
+        gridPane.setPadding(new Insets(20, 20, 20, 20));
+
+        ObservableList<String> list = FXCollections.<String>observableArrayList("Test1", "Test2", "Test3");
+        ListView<String> listView = new ListView<>(list);
+        listView.setMaxHeight(150);
+        gridPane.add(listView, 0, 0, 1, 1);
+
+        javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(new Image("/images/test.png"));
+        imageView.setFitWidth(150);
+        imageView.setFitHeight(150);
+        gridPane.add(imageView, 2, 0, 1, 1);
+
+        HBox buttonHBox = new HBox();
+        buttonHBox.setSpacing(5);
+        buttonHBox.setPadding(new Insets(30, 0, 0, 0));
+        buttonHBox.setAlignment(Pos.BASELINE_RIGHT);
+        Button newButton = new Button("New...");
+        Button openButton = new Button("Open");
+        buttonHBox.getChildren().addAll(newButton, openButton);
+
+        gridPane.add(buttonHBox, 0, 1, 3, 1);
+        gridPane.setAlignment(Pos.CENTER);
+        Rectangle border = new Rectangle(0, 0, 500, 400);
+        border.setFill(Color.LIGHTBLUE);
+        border.setStrokeWidth(5);
+        border.setStroke(Color.BLACK);
+
+        stackPane.setAlignment(Pos.CENTER);
+        stackPane.getChildren().addAll(border, gridPane);
+
+        borderPane1.setCenter(stackPane);
+        primaryStage.setScene(new Scene(borderPane1));
+ 
+        primaryStage.setTitle(configBean.getMainFrameTitle());
+        primaryStage.show();
+
+    }
+
+    private void setUpMainWindow(Stage primaryStage) {
+        javafx.scene.image.ImageView imageView;
         BorderPane borderPane = new BorderPane();
         imagePane = new AnchorPane();
         borderPane.setCenter(imagePane);
         setUpMenuBar(borderPane, primaryStage);
-
         //Load a sample image for development only
-        Image image = new Image("/images/test.png");
+        //Image image = new Image("/images/test.png");
+        File imageFile = new File(configBean.getImagePath());
+        Image image = new Image(imageFile.toURI().toString());
         imageView = new ImageView(image, this);
         imagePane.getChildren().add(imageView);
-
         setUpChangeListenerForChangingList();
-
         setUpTableView(borderPane);
-
         primaryStage.setScene(new Scene(borderPane));
+        Font.loadFont(MainController.class.getResource("/fonts/FreeSerif.ttf").toExternalForm(), 10);
         primaryStage.setTitle(configBean.getMainFrameTitle());
         primaryStage.titleProperty().bind(configBean.mainFrameTitle().
                 concat(" ").concat(configBean.fileLocationProperty()));
         primaryStage.show();
-
     }
 
     private void setUpTableView(BorderPane borderPane) {
@@ -161,6 +212,7 @@ public class MainController extends Application implements Controller {
         Menu fileMenu = new Menu("File");
         menuBar.getMenus().add(fileMenu);
 
+        //create menu
         //Open Menu
         MenuItem openMenuItem = new MenuItem("Open...");
         fileMenu.getItems().add(openMenuItem);
@@ -188,7 +240,7 @@ public class MainController extends Application implements Controller {
                 //System.out.println(file.getParent());
                 config.setInitialDirectory(file.getParent());
                 config.setInitialFileName(file.getName());
-                
+
             } catch (JAXBException ex) {
                 Alert errorDialog = new Alert(Alert.AlertType.ERROR);
                 errorDialog.setContentText("An error occured trying to open the file");
@@ -205,6 +257,7 @@ public class MainController extends Application implements Controller {
             ConfigurationBean config = ConfigurationBean.createInstance();
             FileChooser fc = new FileChooser();
             fc.setInitialDirectory(new File(config.getInitialDirectory()));
+            //System.out.println(config.getInitialDirectory()+config.getInitialFileName());
             fc.setInitialFileName(config.getInitialFileName());
             fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up files",
                     config.getFileExtensions()));
@@ -214,10 +267,11 @@ public class MainController extends Application implements Controller {
                 if (fileToSave == null) {
                     return;
                 }
-                if(!fileToSave.exists()){
+                if (!fileToSave.exists()) {
                     fileToSave.createNewFile();
                 }
                 if (fileToSave.canWrite()) {
+                    config.setInitialDirectory(fileToSave.getParent());
                     Marshaller marshaller = context.createMarshaller();
                     // output pretty printed
                     marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -225,7 +279,7 @@ public class MainController extends Application implements Controller {
                     Annotations annotations = new Annotations();
                     annotations.setAnotations(bm.getAnnotationList());
                     marshaller.marshal(annotations, fileToSave);
-                    
+
                 }
 
             } catch (Exception ex) {
@@ -281,7 +335,7 @@ public class MainController extends Application implements Controller {
 
     private void setUpChangeListenerForChangingList() {
         //Set up listener for annotation list
- 
+
         ObservableList<Annotation> aList = bm.getAnnotationList();
         aList.addListener((ListChangeListener.Change<? extends Annotation> c) -> {
             if (c.next()) {
@@ -428,15 +482,12 @@ public class MainController extends Application implements Controller {
     }
 
     /**
-    private void setUpEditingPropertyListeners(Annotation a) {
-        a.descriptionProperty().addListener(new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                bm.setAnnotationList(bm.getAnnotationList());
-            }
-        });
-    }
-    **/
-
+     * private void setUpEditingPropertyListeners(Annotation a) {
+     * a.descriptionProperty().addListener(new ChangeListener<String>() {
+     *
+     * @Override public void changed(ObservableValue<? extends String>
+     * observable, String oldValue, String newValue) {
+     * bm.setAnnotationList(bm.getAnnotationList()); } }); }
+     *
+     */
 }
