@@ -439,8 +439,8 @@ public class MainController extends Application implements Controller {
         for (Annotation a : aList) {
             a.getProperties().put(Annotation.GROUP_NODE, createViewGroupNode(a));
             imagePane.getChildren().add((Node) a.getProperties().get(Annotation.GROUP_NODE));
+            
         }
-
     }
 
     /**

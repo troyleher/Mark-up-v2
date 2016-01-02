@@ -5,12 +5,10 @@
  */
 package org.troy.markup.model;
 
-import java.util.LinkedList;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
-import org.troy.markup.utilities.Utilities;
 
 /**
  *
