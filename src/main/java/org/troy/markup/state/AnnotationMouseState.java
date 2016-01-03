@@ -5,7 +5,8 @@
  */
 package org.troy.markup.state;
 
-import org.troy.markup.model.Annotation;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 
 /**
  *
@@ -13,6 +14,8 @@ import org.troy.markup.model.Annotation;
  */
 public interface AnnotationMouseState {
     
-    public void changeEffects(Annotation a);
+    public void changeRectangleEffects(Rectangle r);
+    public void changeCircleEffects(Circle c);
+    //public void changeRectangleCircleEffects(Rectangle r, Circle c);
     
 }

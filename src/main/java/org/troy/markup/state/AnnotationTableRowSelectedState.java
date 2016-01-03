@@ -6,10 +6,8 @@
 package org.troy.markup.state;
 
 import javafx.scene.paint.Color;
-import org.troy.markup.model.Annotation;
-import org.troy.markup.model.AnnotationCircleBean;
-import org.troy.markup.model.AnnotationRectangleBean;
-import org.troy.markup.model.BeanManager;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 
 /**
  *
@@ -18,19 +16,17 @@ import org.troy.markup.model.BeanManager;
 public class AnnotationTableRowSelectedState implements AnnotationMouseState {
 
     @Override
-    public void changeEffects(Annotation a) {
-        AnnotationRectangleBean rect = a.getRectangle();
-        AnnotationCircleBean circle = a.getCircle();
+    public void changeRectangleEffects(Rectangle r) {
+        r.setStroke(Color.ROYALBLUE);
+        r.setStrokeWidth(2);
+        r.setStyle("-fx-fill: null;");
+    }
 
-        rect.setStroke(Color.ROYALBLUE);
-        rect.setStrokeWidth(2);
-        //rect.setEffect(new Glow(1.0));
-        rect.setStyle("-fx-fill: null;");
-
-        circle.setStroke(Color.ROYALBLUE);
-        circle.setStrokeWidth(2);
-        circle.setFill(Color.TRANSPARENT);
-
+    @Override
+    public void changeCircleEffects(Circle c) {
+        c.setStroke(Color.ROYALBLUE);
+        c.setStrokeWidth(2);
+        c.setFill(Color.TRANSPARENT);
     }
 
 }

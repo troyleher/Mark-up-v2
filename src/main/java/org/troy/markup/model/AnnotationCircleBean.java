@@ -6,49 +6,70 @@
 package org.troy.markup.model;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.shape.Circle;
+import javafx.beans.property.SimpleDoubleProperty;
 
 /**
  *
  * @author Troy
  */
-public class AnnotationCircleBean extends Circle{
-    
+public class AnnotationCircleBean {
+
+    private DoubleProperty x = new SimpleDoubleProperty();
+    private DoubleProperty y = new SimpleDoubleProperty();
+    private DoubleProperty radius = new SimpleDoubleProperty();
     private boolean isCirclePressed = false;
     private BooleanProperty circleMoved = new SimpleBooleanProperty(false);
-    
-    private AnnotationCircleBean(){}
-    public AnnotationCircleBean(double xPos, double yPos, double radius){
-       super(xPos, yPos, radius);
-    }
-    public AnnotationCircleBean(AnnotationCircleBean circle){
-        this(circle.getXPos(), circle.getYPos(), circle.getRadius());
+
+    public AnnotationCircleBean() {
+        this(0, 0, 0);
     }
 
-    public double getXPos() {
-        return getCenterX();
+    public AnnotationCircleBean(double xPos, double yPos, double radius) {
+        this.x.set(xPos);
+        this.y.set(yPos);
+        this.radius.set(radius);
     }
 
-    public void setXPos(double xPos) {
-        setCenterX(xPos);
+    public AnnotationCircleBean(AnnotationCircleBean circle) {
+        this(circle.getX(), circle.getY(), circle.getRadius());
     }
 
-
-    public double getYPos() {
-        return getCenterY();
+    public double getX() {
+        return x.get();
     }
 
-    public void setYPos(double yPos) {
-        setCenterY(yPos);
-    }
-    
-    public double getCircleRadius() {
-        return getRadius();
+    public void setX(double x) {
+        this.x.set(x);
     }
 
-    public void setCircleRadius(double radius) {
-        setRadius(radius);
+    public DoubleProperty xProperty() {
+        return x;
+    }
+
+    public double getY() {
+        return y.get();
+    }
+
+    public void setY(double yPos) {
+        y.set(yPos);
+    }
+
+    public DoubleProperty yProperty() {
+        return y;
+    }
+
+    public double getRadius() {
+        return radius.get();
+    }
+
+    public void setRadius(double radius) {
+        this.radius.set(radius);
+    }
+
+    public DoubleProperty radiusProperty() {
+        return radius;
     }
 
     public boolean isIsCirclePressed() {
@@ -58,37 +79,38 @@ public class AnnotationCircleBean extends Circle{
     public void setIsCirclePressed(boolean isCirclePressed) {
         this.isCirclePressed = isCirclePressed;
     }
-    public void setCircleMoved(boolean moved){
+
+    public void setCircleMoved(boolean moved) {
         circleMoved.set(moved);
     }
-    public boolean getCircleMoved(){
+
+    public boolean getCircleMoved() {
         return circleMoved.get();
     }
-    public BooleanProperty circleMovedProperty(){
-        return  circleMoved;
+
+    public BooleanProperty circleMovedProperty() {
+        return circleMoved;
     }
+
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object o) {
         boolean isEqual = false;
-        if(obj instanceof AnnotationCircleBean){
-            AnnotationCircleBean aCircle = (AnnotationCircleBean)obj;
-          
-            if(aCircle.getCenterX() == this.getCenterX())
-                if(aCircle.getCenterY() == this.getCenterY())
-                    if(aCircle.getRadius() == this.getRadius()){
+        if (o instanceof AnnotationCircleBean) {
+            AnnotationCircleBean c = (AnnotationCircleBean) o;
+            if (c.getX() == this.getX()) {
+                if (c.getY() == this.getY()) {
+                    if (c.getRadius() == this.getRadius()) {
                         isEqual = true;
                     }
+                }
+            }
         }
         return isEqual;
     }
 
     @Override
     public int hashCode() {
-        return centerXProperty().hashCode() + centerYProperty().hashCode() + radiusProperty().hashCode();
+        return x.hashCode() + y.hashCode() + radius.hashCode();
     }
-    
-    
-    
-    
-    
+
 }

@@ -18,7 +18,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Annotations {
 
     private List<Annotation> anotations = new ArrayList<>();
-    private ConfigurationBean configBean = ConfigurationBean.createInstance();
 
     public List<Annotation> getAnotations() {
         return anotations;
@@ -29,13 +28,7 @@ public class Annotations {
         this.anotations = anotations;
     }
 
-    public ConfigurationBean getConfigBean() {
-        return configBean;
-    }
 
-    public void setConfigBean(ConfigurationBean configBean) {
-        this.configBean = configBean;
-    }
     
 
 }

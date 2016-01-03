@@ -5,67 +5,84 @@
  */
 package org.troy.markup.model;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.shape.Rectangle;
 
 /**
  *
  * @author Troy
  */
-public class AnnotationRectangleBean extends Rectangle{
+public class AnnotationRectangleBean {
 
-   
+    private DoubleProperty x = new SimpleDoubleProperty();
+    private DoubleProperty y = new SimpleDoubleProperty();
+    private DoubleProperty width = new SimpleDoubleProperty();
+    private DoubleProperty height = new SimpleDoubleProperty();
+
     private AnnotationRectangleBean() {
         super();
     }
 
     public AnnotationRectangleBean(double xPos, double yPos,
             double width, double height) {
-        super(xPos, yPos, width, height);
+        this.x.set(xPos);
+        this.y.set(yPos);
+        this.width.set(width);
+        this.height.set(height);
     }
-    public AnnotationRectangleBean(AnnotationRectangleBean a){
+
+    public AnnotationRectangleBean(AnnotationRectangleBean a) {
         this(a.getX(), a.getY(), a.getWidth(), a.getHeight());
     }
 
-    
-    public final void setXPos(Double value) {
-        setX(value);
+    public double getX() {
+        return x.get();
     }
 
-    public final Double getXPos() {
-        return getX();
+    public void setX(double value) {
+        x.set(value);
     }
 
-  
-
-    public final void setYPos(Double value) {
-        setY(value);
+    public DoubleProperty xProperty() {
+        return x;
     }
 
-    public final Double getYPos() {
-        return getY();
+    public double getY() {
+        return y.get();
     }
 
-    
-
-    public final void setRectangleWidth(Double value) {
-        setWidth(value);
+    public void setY(double value) {
+        y.set(value);
     }
 
-    public final Double getRectangleWidth() {
-        return getWidth();
+    public DoubleProperty yProperty() {
+        return y;
     }
 
-   
-
-    public final void setRectangleHeight(Double value) {
-        setHeight(value);
+    public double getWidth() {
+        return width.get();
     }
 
-    public final Double getRectangleHeight() {
-        return getHeight();
+    public void setWidth(double value) {
+        width.set(value);
     }
 
- 
+    public DoubleProperty widthProperty() {
+        return width;
+    }
+
+    public double getHeight() {
+        return height.get();
+    }
+
+    public void setHeight(double value) {
+        height.set(value);
+    }
+
+    public DoubleProperty heightProperty() {
+        return height;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -87,10 +104,8 @@ public class AnnotationRectangleBean extends Rectangle{
 
     @Override
     public int hashCode() {
-        return xProperty().hashCode() + yProperty().hashCode() + 
-                widthProperty().hashCode() + heightProperty().hashCode();
+        return xProperty().hashCode() + yProperty().hashCode()
+                + widthProperty().hashCode() + heightProperty().hashCode();
     }
-
-    
 
 }

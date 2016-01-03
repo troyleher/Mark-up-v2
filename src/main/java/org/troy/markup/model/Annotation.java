@@ -32,10 +32,6 @@ public final class Annotation {
     private AnnotationRectangleBean rectangle;
     private StringProperty symbol = new SimpleStringProperty(this, "symbol", null);
     private StringProperty description = new SimpleStringProperty(this, "description", "To be done.");
-    private AnnotationMouseState annotationMouseState;
-    private ObservableMap<String, Object> properties = FXCollections.observableHashMap();
-
-    public static final String GROUP_NODE = "GROUP_NODE";
 
     private BeanManager bm = BeanManager.createInstance();
     UndoRedoManager urm = UndoRedoManagerImpl.getInstance();
@@ -48,18 +44,14 @@ public final class Annotation {
         setUpAnnotationRectangle(xPos, yPos, width, height);
         setUpAnnotationCircle(xPos, yPos);
         symbol.set(AnnotationLetterFactory.createLetter());
-        annotationMouseState = new AnnotationMouseDefaultState();
-        annotationMouseState.changeEffects(this);
     }
 
     public Annotation(Annotation a) {
         AnnotationRectangleBean rect = a.getRectangle();
         AnnotationCircleBean c = a.getCircle();
         setUpAnnotationRectangle(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
-        setUpAnnotationCircle(c.getXPos(), c.getYPos(), c.getRadius());
+        setUpAnnotationCircle(c.getX(), c.getY(), c.getRadius());
         this.setDescription(a.getDescription());
-        annotationMouseState = a.getAnnotationMouseState();
-        annotationMouseState.changeEffects(this);
         this.setSymbol(a.getSymbol());
 
     }
@@ -75,12 +67,7 @@ public final class Annotation {
     private void setUpAnnotationRectangle(double xPos, double yPos, double width, double height) {
         rectangle = new AnnotationRectangleBean(xPos, yPos, width, height);
         //rectangle.setPickOnBounds(false);
-        rectangle.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
-            new AnnotationMouseEnteredState().changeEffects(this);
-        });
-        rectangle.addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-            new AnnotationMouseDefaultState().changeEffects(this);
-        });
+
     }
 
     public AnnotationCircleBean getCircle() {
@@ -110,16 +97,7 @@ public final class Annotation {
         return symbol;
     }
 
-    public AnnotationMouseState getAnnotationMouseState() {
-        return annotationMouseState;
-    }
-
-    @XmlTransient
-    public void setAnnotationMouseState(AnnotationMouseState annotationMouseState) {
-        this.annotationMouseState = annotationMouseState;
-    }
-
-    public String getDescription() {
+       public String getDescription() {
         return description.get();
     }
 
@@ -129,15 +107,6 @@ public final class Annotation {
 
     public StringProperty descriptionProperty() {
         return description;
-    }
-
-    public ObservableMap<String, Object> getProperties() {
-        return properties;
-    }
-
-    @XmlTransient
-    public void setProperties(ObservableMap<String, Object> properties) {
-        this.properties = properties;
     }
 
 }

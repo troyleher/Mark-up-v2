@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.BeanManager;
-import org.troy.markup.model.ConfigurationBean;
+import org.troy.markup.model.SystemConfigBean;
 
 /**
  *
@@ -73,7 +73,7 @@ public class AnnotationEditingDialog {
         HBox specialCharBox = new HBox();
         specialCharBox.setAlignment(Pos.BASELINE_LEFT);
         specialCharBox.setSpacing(10);
-        List<String> specialCharList = ConfigurationBean.createInstance().getSpecialCharList();
+        List<String> specialCharList = SystemConfigBean.createInstance().getSpecialCharList();
         for (String character : specialCharList) {
             Button b = new Button(character);
             b.setFont(new Font("FreeSerif", 12));

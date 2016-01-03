@@ -5,7 +5,9 @@
  */
 package org.troy.markup.controller;
 
+import javafx.collections.ObservableList;
 import javafx.scene.shape.Rectangle;
+import org.troy.markup.model.Annotation;
 
 /**
  *
@@ -18,6 +20,7 @@ public interface Controller {
     public void displayDraggingRectangle(Rectangle r);
     
     public void removeDraggingRectangle(Rectangle r);
+    public void initAnnotations(ObservableList<Annotation> aList);
     
    
     

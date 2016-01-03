@@ -11,29 +11,32 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author Troy
  */
-public class ConfigurationBean {
+@XmlRootElement
+public class SystemConfigBean {
 
-    private static ConfigurationBean configurationBean;
+    private static SystemConfigBean configurationBean;
     private final StringProperty mainFrameTitle = new SimpleStringProperty("Mark Up App");
     private final StringProperty initialFileName = new SimpleStringProperty("untitled.xml");
     private final StringProperty initialDirectory = new SimpleStringProperty("c:\\");
     private final StringProperty imagePath = new SimpleStringProperty("C:\\test3.png");
     private ObservableList<String> specialCharList = FXCollections.observableArrayList(new ArrayList<String>());
     private ObservableList<String> fileExtensions = FXCollections.observableArrayList(new ArrayList<String>());
+    private ObservableList<String> recentFileList = FXCollections.observableArrayList(new ArrayList<String>());
 
-    private ConfigurationBean() {
+    private SystemConfigBean() {
         setUpSpecialCharList();
         fileExtensions.add("*.xml");
     }
 
-    public static ConfigurationBean createInstance() {
+    public static SystemConfigBean createInstance() {
         if (configurationBean == null) {
-            configurationBean = new ConfigurationBean();
+            configurationBean = new SystemConfigBean();
         }
         return configurationBean;
 
@@ -114,6 +117,14 @@ public class ConfigurationBean {
 
     public StringProperty imagePathProperty() {
         return imagePath;
+    }
+
+    public void setRecentFileList(ObservableList<String> list) {
+        this.recentFileList = list;
+    }
+
+    public ObservableList<String> getRecentFileList() {
+        return recentFileList;
     }
 
 }
