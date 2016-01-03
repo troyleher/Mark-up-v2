@@ -38,10 +38,14 @@ public class SaveFileChooserHandler implements EventHandler<ActionEvent> {
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up",
                 configBean.getFileExtensions()));
         File fileToSave = fc.showSaveDialog(stage);
+        if(fileToSave == null){
+            return;
+        }
         AnnotationDAO dao = new AnnotationDAOJAXB();
         Annotations annotations = new Annotations();
         annotations.setAnotations(BeanManager.createInstance().getAnnotationList());
         dao.save(annotations, fileToSave);
+        SystemConfigBean.createInstance().getRecentFileList().add(fileToSave.getAbsolutePath());
     }
 
 }

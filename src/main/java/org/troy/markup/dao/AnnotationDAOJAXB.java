@@ -31,11 +31,7 @@ public class AnnotationDAOJAXB implements AnnotationDAO{
             Logger.getLogger(AnnotationDAOJAXB.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    
-
-
-
+  
     @Override
     public Annotations getAnnotations(File fileToOpen) {
         try {
@@ -59,9 +55,7 @@ public class AnnotationDAOJAXB implements AnnotationDAO{
                 marshaller.marshal(annotations, file);
                 fileWasSaved = true;
             }
-        } catch (JAXBException ex) {
-            Logger.getLogger(AnnotationDAOJAXB.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (JAXBException | IOException ex) {
             Logger.getLogger(AnnotationDAOJAXB.class.getName()).log(Level.SEVERE, null, ex);
         }
         return fileWasSaved;

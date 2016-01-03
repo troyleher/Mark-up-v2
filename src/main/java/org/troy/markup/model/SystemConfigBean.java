@@ -12,12 +12,14 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  *
  * @author Troy
  */
 @XmlRootElement
+@XmlType(factoryMethod = "createInstance")
 public class SystemConfigBean {
 
     private static SystemConfigBean configurationBean;

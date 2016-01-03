@@ -5,15 +5,8 @@
  */
 package org.troy.markup.view;
 
-import java.awt.BorderLayout;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
@@ -24,11 +17,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import org.troy.markup.controller.Main;
-import org.troy.markup.model.SystemConfigWrapper;
 
 /**
  *
@@ -82,6 +70,7 @@ public class WelcomeView extends BorderPane{
         stackPane.getChildren().addAll(border, gridPane);
         
         this.setCenter(stackPane);
+        stage.setTitle("Welcome");
     }
 
     public ListView<String> getListView() {

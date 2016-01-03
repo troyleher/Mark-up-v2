@@ -49,6 +49,10 @@ public class OpenFileChooserHandler implements EventHandler<ActionEvent> {
             MainController mc = new MainController(mainView);
             bm.setAnnotationList(FXCollections.observableArrayList(a.getAnotations()));
             mc.initAnnotations(bm.getAnnotationList());
+            
+            //Update Config
+            scb.setInitialDirectory(file.getParent());
+            scb.setInitialFileName(file.getName());
         }
     }
 

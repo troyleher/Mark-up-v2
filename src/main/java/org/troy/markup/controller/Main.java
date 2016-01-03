@@ -76,14 +76,12 @@ public class Main extends Application  {
         configBean = SystemConfigBean.createInstance();
         bm = BeanManager.createInstance();
         urm = UndoRedoManagerImpl.getInstance();
-        //fcc = new FileChooserController(this);
         initStageEvents(primaryStage);
 
         //Load system config information
         JAXBManager.loadStaticClasses(SystemConfigBean.class, SYSTEM_FILE_PATH);
-
         WelcomeView wv = new WelcomeView(primaryStage);
-        WelcomeViewController wvc = new WelcomeViewController(wv, this);
+        WelcomeViewController wvc = new WelcomeViewController(wv);
         primaryStage.setScene(new Scene(wv));
         primaryStage.show();
     }
@@ -104,7 +102,6 @@ public class Main extends Application  {
 
                 }
                 shouldSave.close();
-
             }
             JAXBManager.saveStaticClasses(SystemConfigBean.class, SYSTEM_FILE_PATH, SystemConfigBean.createInstance());
         });

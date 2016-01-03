@@ -86,7 +86,7 @@ public class MainView extends BorderPane {
         setUpTableView(this);
         primaryStage.setScene(new Scene(this));
         Font.loadFont(Main.class.getResource("/fonts/FreeSerif.ttf").toExternalForm(), 10);
-        primaryStage.setTitle(configBean.getMainFrameTitle());
+        //primaryStage.setTitle(configBean.getMainFrameTitle());
         primaryStage.titleProperty().bind(configBean.mainFrameTitle().
                 concat(" ").concat(configBean.fileLocationProperty()));
         Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();

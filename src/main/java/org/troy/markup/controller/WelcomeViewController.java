@@ -7,7 +7,9 @@ package org.troy.markup.controller;
 
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import org.troy.markup.eventhandlers.OpenFileChooserHandler;
+import org.troy.markup.model.SystemConfigBean;
 import org.troy.markup.view.WelcomeView;
 
 /**
@@ -18,16 +20,20 @@ public class WelcomeViewController {
     
 
     private WelcomeView welcomeView;
-    private Main mainController;
 
-    public WelcomeViewController(WelcomeView wv, Main mainController) {
+    public WelcomeViewController(WelcomeView wv) {
         welcomeView = wv;
-        this.mainController = mainController;
         initEventHandlers();
+        initGUI();
     }
 
     private void initEventHandlers() {
         Button openButton = welcomeView.getOpenButton();
         openButton.addEventHandler(ActionEvent.ACTION, new OpenFileChooserHandler(welcomeView.getStage()));
+    }
+
+    private void initGUI() {
+        ListView<String> listView = welcomeView.getListView();
+        listView.setItems(SystemConfigBean.createInstance().getRecentFileList());
     }
 }
