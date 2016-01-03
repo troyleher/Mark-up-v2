@@ -15,7 +15,7 @@ import org.troy.markup.model.Annotations;
  */
 public interface AnnotationDAO {
 
-    public boolean save();
+    public boolean save(Annotations annotations, File file);
     public Annotations getAnnotations(File fileToOpen);
 
 }

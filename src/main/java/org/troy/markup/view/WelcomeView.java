@@ -23,10 +23,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import org.troy.markup.controller.MainController;
+import org.troy.markup.controller.Main;
 import org.troy.markup.model.SystemConfigWrapper;
 
 /**
@@ -37,8 +38,10 @@ public class WelcomeView extends BorderPane{
     private ListView<String> listView;
     private Button newButton;
     private Button openButton;
+    private Stage stage;
     
-    public WelcomeView() {
+    public WelcomeView(Stage stage) {
+        this.stage = stage;
         initGUI();
     }
     
@@ -94,6 +97,10 @@ public class WelcomeView extends BorderPane{
         return openButton;
     }
 
+    public Stage getStage() {
+        return stage;
+    }
+    
  
     
    

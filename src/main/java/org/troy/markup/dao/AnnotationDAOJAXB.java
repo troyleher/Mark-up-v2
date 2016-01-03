@@ -6,10 +6,12 @@
 package org.troy.markup.dao;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import org.troy.markup.model.Annotations;
 import org.troy.markup.model.BeanManager;
@@ -32,12 +34,7 @@ public class AnnotationDAOJAXB implements AnnotationDAO{
     
     
 
-    @Override
-    public boolean save() {
-        boolean wasSaved = false;
-        
-        return wasSaved;
-    }
+
 
     @Override
     public Annotations getAnnotations(File fileToOpen) {
@@ -48,6 +45,26 @@ public class AnnotationDAOJAXB implements AnnotationDAO{
             Logger.getLogger(AnnotationDAOJAXB.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    @Override
+    public boolean save(Annotations annotations,File file) {
+        boolean fileWasSaved = false;
+        try {
+            Marshaller marshaller = context.createMarshaller();
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            if(file.canWrite()){
+                marshaller.marshal(annotations, file);
+                fileWasSaved = true;
+            }
+        } catch (JAXBException ex) {
+            Logger.getLogger(AnnotationDAOJAXB.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(AnnotationDAOJAXB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return fileWasSaved;
     }
 
 

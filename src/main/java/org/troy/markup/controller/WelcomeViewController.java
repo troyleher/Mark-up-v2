@@ -18,9 +18,9 @@ public class WelcomeViewController {
     
 
     private WelcomeView welcomeView;
-    private MainController mainController;
+    private Main mainController;
 
-    public WelcomeViewController(WelcomeView wv, MainController mainController) {
+    public WelcomeViewController(WelcomeView wv, Main mainController) {
         welcomeView = wv;
         this.mainController = mainController;
         initEventHandlers();
@@ -28,12 +28,6 @@ public class WelcomeViewController {
 
     private void initEventHandlers() {
         Button openButton = welcomeView.getOpenButton();
-        openButton.addEventHandler(ActionEvent.ACTION, new OpenFileChooserHandler(mainController));
+        openButton.addEventHandler(ActionEvent.ACTION, new OpenFileChooserHandler(welcomeView.getStage()));
     }
-    
-    
-
-    
-    
-    
 }
