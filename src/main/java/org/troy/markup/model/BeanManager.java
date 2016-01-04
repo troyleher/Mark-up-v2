@@ -6,6 +6,8 @@
 package org.troy.markup.model;
 
 import javafx.beans.Observable;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
@@ -17,17 +19,19 @@ import javafx.util.Callback;
 public class BeanManager {
 
     private final ObservableList<Annotation> annotationList;
+    private final StringProperty imagePath = new SimpleStringProperty();
+    private boolean fileHasChanged = false;
     private static BeanManager beanManager;
 
     private BeanManager() {
-        annotationList = FXCollections.observableArrayList(new Callback<Annotation, Observable[]>(){
+        annotationList = FXCollections.observableArrayList(new Callback<Annotation, Observable[]>() {
 
             @Override
             public Observable[] call(Annotation a) {
-               return new Observable[]{a.descriptionProperty(), a.symbolProperty(),
-                  a.getCircle().circleMovedProperty()};
+                return new Observable[]{a.descriptionProperty(), a.symbolProperty(),
+                    a.getCircle().circleMovedProperty()};
             }
-        
+
         });
     }
 
@@ -57,6 +61,33 @@ public class BeanManager {
 
     public void addAnnotationToList(Annotation a) {
         annotationList.add(a);
+    }
+
+    public boolean isFileChanged() {
+        return fileHasChanged;
+    }
+
+    public void setFileChanged(boolean fileHasChanged) {
+        this.fileHasChanged = fileHasChanged;
+    }
+
+    public String getImagePath() {
+        return imagePath.get();
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath.set(imagePath);
+    }
+
+    public StringProperty imagePathProperty() {
+        return imagePath;
+    }
+
+    public Annotations createProjectFile() {
+        Annotations annotations = new Annotations();
+        annotations.setAnotations(annotationList);
+        annotations.setImagePath(imagePath.get());
+        return annotations;
     }
 
 }

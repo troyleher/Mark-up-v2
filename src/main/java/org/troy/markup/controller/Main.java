@@ -6,65 +6,31 @@
 package org.troy.markup.controller;
 
 import java.io.File;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import org.troy.markup.dao.AnnotationDAO;
+import org.troy.markup.dao.AnnotationDAOJAXB;
+import org.troy.markup.eventhandlers.SaveFileChooserHandler;
 import org.troy.markup.memento.*;
 import org.troy.markup.model.*;
-import org.troy.markup.state.*;
 import org.troy.markup.utilities.Utilities;
 import org.troy.markup.view.*;
 
 /**
  * @author Troy
  */
-public class Main extends Application  {
+public class Main extends Application {
 
-    private AnnotationImageView imageView;
-    private Pane imagePane;
     private BeanManager bm;
     private UndoRedoManager urm;
-    private ContextMenu tableViewContextMenu;
-    private MenuItem deleteMenuItem;
-    private TableView<Annotation> tableView;
-    private SystemConfigBean configBean;
-    private FileChooserController fcc;
-    private boolean fileHasChanged = false;
-
+    private SystemConfigBean cb;
     private final static String SYSTEM_FILE_PATH = "/system/SystemConfig.xml";
 
     public static void main(String... args) {
@@ -73,22 +39,30 @@ public class Main extends Application  {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        configBean = SystemConfigBean.createInstance();
+        cb = SystemConfigBean.createInstance();
         bm = BeanManager.createInstance();
         urm = UndoRedoManagerImpl.getInstance();
         initStageEvents(primaryStage);
 
         //Load system config information
         JAXBManager.loadStaticClasses(SystemConfigBean.class, SYSTEM_FILE_PATH);
-        WelcomeView wv = new WelcomeView(primaryStage);
-        WelcomeViewController wvc = new WelcomeViewController(wv);
-        primaryStage.setScene(new Scene(wv));
-        primaryStage.show();
+        try {
+            WelcomeView wv = new WelcomeView(primaryStage);
+            WelcomeViewController wvc = new WelcomeViewController(wv);
+            primaryStage.setScene(new Scene(wv));
+            primaryStage.show();
+        } catch (Exception e) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
+            Alert alertError = new Alert(Alert.AlertType.ERROR);
+            alertError.setContentText(e.getCause().getMessage());
+            alertError.showAndWait();
+            alertError.close();
+        }
     }
 
     private void initStageEvents(Stage primaryStage) {
         primaryStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, e -> {
-            if (fileHasChanged) {
+            if (bm.isFileChanged()) {
                 //Ask if user would like to save the file
                 Alert shouldSave = new Alert(Alert.AlertType.WARNING);
                 shouldSave.setContentText("Save changes?");
@@ -97,7 +71,19 @@ public class Main extends Application  {
                 shouldSave.getButtonTypes().add(ButtonType.NO);
                 Optional<ButtonType> result = shouldSave.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.YES) {
-                    //displaySaveFileChooser(primaryStage);
+                    //If file exists save without prompting
+                    String fileAbsolutePath = cb.getInitialDirectory() + "\\" + cb.getInitialFileName();
+                    File fileToSave = new File(fileAbsolutePath);
+                    if (fileToSave.exists() && fileToSave.canWrite()) {
+                        AnnotationDAO dao = new AnnotationDAOJAXB();
+                        dao.save(bm.createProjectFile(), fileToSave);
+                        Utilities.updateRecentFileList(fileToSave);
+                    }
+                    //if file does not exist display file chooser
+                    if (!fileToSave.exists()) {
+                        SaveFileChooserHandler fileChooser = new SaveFileChooserHandler(primaryStage);
+                        fileChooser.handle(null);
+                    }
                 } else {
 
                 }

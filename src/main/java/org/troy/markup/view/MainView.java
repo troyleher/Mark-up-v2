@@ -6,14 +6,8 @@
 package org.troy.markup.view;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -22,21 +16,15 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javax.xml.bind.JAXBException;
-import org.troy.markup.controller.AnnotationImageViewController;
 import org.troy.markup.controller.FileChooserController;
 import org.troy.markup.controller.Main;
-import org.troy.markup.controller.MainController;
 import org.troy.markup.memento.UndoRedoManager;
-import org.troy.markup.memento.UndoRedoManagerImpl;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.BeanManager;
 import org.troy.markup.model.SystemConfigBean;
@@ -49,7 +37,7 @@ public class MainView extends BorderPane {
 
     private AnnotationImageView imageView;
     private Pane imagePane;
-    private BeanManager bm;
+    private BeanManager bm = BeanManager.createInstance();
     private UndoRedoManager urm;
     private ContextMenu tableViewContextMenu;
     private MenuItem deleteMenuItem;
@@ -61,8 +49,6 @@ public class MainView extends BorderPane {
     private TableView<Annotation> tableView;
     private SystemConfigBean configBean = SystemConfigBean.createInstance();
     private FileChooserController fcc;
-    private boolean fileHasChanged = false;
-    //private MainController mc;
     private Stage primaryStage;
 
     public MainView(Stage primaryStage) {
@@ -76,9 +62,9 @@ public class MainView extends BorderPane {
         this.setCenter(imagePane);
         setUpMenuBar();
         //Load a sample image for development only
-        Image image = new Image("/images/test.png");
-        File imageFile = new File(configBean.getImagePath());
-        //Image image = new Image(imageFile.toURI().toString());
+        //Image image = new Image("/images/test.png");
+        File imageFile = new File(bm.getImagePath());
+        Image image = new Image(imageFile.toURI().toString());
         imageView = new AnnotationImageView(image);
         
         imagePane.getChildren().add(imageView);

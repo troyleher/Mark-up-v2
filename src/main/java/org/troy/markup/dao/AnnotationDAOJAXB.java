@@ -33,14 +33,9 @@ public class AnnotationDAOJAXB implements AnnotationDAO{
     }
   
     @Override
-    public Annotations getAnnotations(File fileToOpen) {
-        try {
+    public Annotations getAnnotations(File fileToOpen) throws JAXBException{
             Unmarshaller marshaller = context.createUnmarshaller();
             return (Annotations)marshaller.unmarshal(fileToOpen);
-        } catch (JAXBException ex) {
-            Logger.getLogger(AnnotationDAOJAXB.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
     }
 
     @Override
