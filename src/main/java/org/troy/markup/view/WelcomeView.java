@@ -8,14 +8,18 @@ package org.troy.markup.view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 /**
@@ -27,6 +31,7 @@ public class WelcomeView extends BorderPane{
     private Button newButton;
     private Button openButton;
     private Stage stage;
+    private ImageView imageView;
     
     public WelcomeView(Stage stage) {
         this.stage = stage;
@@ -40,15 +45,23 @@ public class WelcomeView extends BorderPane{
         gridPane.setVgap(5);
         gridPane.setHgap(5);
         gridPane.setPadding(new Insets(20, 20, 20, 20));
-
+        
+        Label recentLabel = new Label("Recent file List");
+        recentLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 15));
+        gridPane.add(recentLabel, 0 , 0, 1, 1);
+        
+        Label imagePreveiwLabel = new Label("Image Preview");
+        imagePreveiwLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 15));
+        gridPane.add(imagePreveiwLabel, 2, 0, 1, 1);
+        
         listView = new ListView<>();
         listView.setMaxHeight(150);
-        gridPane.add(listView, 0, 0, 1, 1);
+        gridPane.add(listView, 0, 1, 1, 1);
         
-        javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(new Image("/images/test.png"));
+        imageView = new javafx.scene.image.ImageView(new Image("/images/noimage_thumbnail.jpg"));
         imageView.setFitWidth(150);
         imageView.setFitHeight(150);
-        gridPane.add(imageView, 2, 0, 1, 1);
+        gridPane.add(imageView, 2, 1, 1, 1);
         
         HBox buttonHBox = new HBox();
         buttonHBox.setSpacing(5);
@@ -59,7 +72,7 @@ public class WelcomeView extends BorderPane{
         
         buttonHBox.getChildren().addAll(newButton, openButton);
         
-        gridPane.add(buttonHBox, 0, 1, 3, 1);
+        gridPane.add(buttonHBox, 0, 2, 3, 1);
         gridPane.setAlignment(Pos.CENTER);
         Rectangle border = new Rectangle(0, 0, 500, 400);
         border.setFill(Color.LIGHTBLUE);
@@ -88,6 +101,10 @@ public class WelcomeView extends BorderPane{
 
     public Stage getStage() {
         return stage;
+    }
+
+    public ImageView getImageView() {
+        return imageView;
     }
     
  

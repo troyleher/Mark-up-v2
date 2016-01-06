@@ -19,9 +19,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javax.xml.bind.JAXBException;
 import org.troy.markup.dao.AnnotationDAO;
 import org.troy.markup.dao.AnnotationDAOJAXB;
 import org.troy.markup.eventhandlers.OpenFileChooserHandler;
@@ -91,6 +94,36 @@ public class WelcomeViewController {
                     }
                 }
             }
+        });
+
+        //List view listener to swap thumbnail image
+        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                //read in xml file
+                //lookup image that is assocaited with this file
+                //if image exist show image in thumbnail
+                //else show default image
+
+                AnnotationDAO dao = new AnnotationDAOJAXB();
+                File fileToOpen = new File(listView.getSelectionModel().getSelectedItem());
+                if (fileToOpen.exists() && fileToOpen.canRead()) {
+                    try {
+                        Annotations annotations = dao.getAnnotations(fileToOpen);
+                        File imagePath = new File(annotations.getImagePath());
+                        ImageView imageView = welcomeView.getImageView();
+                        if(imagePath.exists()){
+                            Image thumbnail = new Image(imagePath.toURI().toString(), imageView.getFitWidth(), imageView.getFitHeight(), false, true);
+                            System.out.println(thumbnail.getHeight());
+                            imageView.setImage(thumbnail);
+                        }
+                    } catch (JAXBException ex) {
+                        Logger.getLogger(WelcomeViewController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
         });
 
         //New button
