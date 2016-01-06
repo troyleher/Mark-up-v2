@@ -25,7 +25,8 @@ import javafx.stage.Stage;
 public class WelcomeView extends BorderPane{
     private ListView<String> listView;
     private Button newButton;
-    private Button openButton;
+    private Button selectButton;
+    private Button openRecentFileButton;
     private Stage stage;
     
     public WelcomeView(Stage stage) {
@@ -50,16 +51,25 @@ public class WelcomeView extends BorderPane{
         imageView.setFitHeight(150);
         gridPane.add(imageView, 2, 0, 1, 1);
         
+        HBox buttonHBox1 = new HBox();
+        buttonHBox1.setSpacing(5);
+        buttonHBox1.setPadding(new Insets(30, 0, 0, 0));
+        buttonHBox1.setAlignment(Pos.BASELINE_LEFT);
+        openRecentFileButton = new Button("Open recent file");
+        buttonHBox1.getChildren().add(openRecentFileButton);
+        gridPane.add(buttonHBox1, 0, 1, 1, 1);
+        
+        
         HBox buttonHBox = new HBox();
         buttonHBox.setSpacing(5);
         buttonHBox.setPadding(new Insets(30, 0, 0, 0));
         buttonHBox.setAlignment(Pos.BASELINE_RIGHT);
         newButton = new Button("New...");
-        openButton = new Button("Open");
+        selectButton = new Button("Select..");
         
-        buttonHBox.getChildren().addAll(newButton, openButton);
+        buttonHBox.getChildren().addAll(newButton, selectButton);
         
-        gridPane.add(buttonHBox, 0, 1, 3, 1);
+        gridPane.add(buttonHBox, 1, 1, 2, 1);
         gridPane.setAlignment(Pos.CENTER);
         Rectangle border = new Rectangle(0, 0, 500, 400);
         border.setFill(Color.LIGHTBLUE);
@@ -82,12 +92,16 @@ public class WelcomeView extends BorderPane{
         return newButton;
     }
 
-    public Button getOpenButton() {
-        return openButton;
+    public Button getSelect() {
+        return selectButton;
     }
 
     public Stage getStage() {
         return stage;
+    }
+
+    public Button getOpenRecentFileButton() {
+        return openRecentFileButton;
     }
     
  

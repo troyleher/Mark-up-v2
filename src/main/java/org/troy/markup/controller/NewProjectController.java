@@ -39,6 +39,7 @@ public class NewProjectController {
             FileChooser fc = new FileChooser();
             fc.setInitialDirectory(new File(scb.getInitialDirectory()));
             fc.setTitle("Select image");
+            fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", scb.getImageExtensions()));
             File imageFile = fc.showOpenDialog(newProjectView.getScene().getWindow());
             if (imageFile != null) {
                 if (imageFile.exists() && imageFile.canWrite()) {

@@ -6,6 +6,7 @@
 package org.troy.markup.controller;
 
 import java.util.List;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -27,6 +28,7 @@ import org.troy.markup.model.Annotation;
 import org.troy.markup.model.AnnotationCircleBean;
 import org.troy.markup.model.AnnotationRectangleBean;
 import org.troy.markup.model.BeanManager;
+import org.troy.markup.model.SystemConfigBean;
 import org.troy.markup.state.AnnotationMouseDefaultState;
 import org.troy.markup.state.AnnotationMouseEnteredState;
 import org.troy.markup.utilities.Utilities;
@@ -43,6 +45,7 @@ public class MainController implements Controller{
 
     private MainView mv;
     private BeanManager bm = BeanManager.createInstance();
+    private SystemConfigBean scb = SystemConfigBean.createInstance();
     private UndoRedoManager urm = UndoRedoManagerImpl.getInstance();
     private final static String SELECTED_INDEX = "SELECTED_INDEX";
 
@@ -110,7 +113,10 @@ public class MainController implements Controller{
         
         //Open menu item
         MenuItem openMenuItem = mv.getOpenMenuItem();
-        openMenuItem.addEventHandler(ActionEvent.ACTION, new OpenFileChooserHandler(mv.getPrimaryStage()));
+        OpenFileChooserHandler ofch = new OpenFileChooserHandler(mv.getPrimaryStage());
+        ofch.setFileExt(FXCollections.observableArrayList(scb.getFileExtensions()));
+        ofch.setFileExtDescription("Mark Up");
+        openMenuItem.addEventHandler(ActionEvent.ACTION, ofch);
         
         //Save menu item
         MenuItem saveMenuItem = mv.getSaveMenuItem();

@@ -48,6 +48,7 @@ public class WelcomeViewController {
     public WelcomeViewController(WelcomeView wv) {
         welcomeView = wv;
         listView = welcomeView.getListView();
+        setUpDefaultState();
         initEventHandlers();
         initGUI();
     }
@@ -55,14 +56,20 @@ public class WelcomeViewController {
     private void initEventHandlers() {
 
         //Open button
-        Button openButton = welcomeView.getOpenButton();
-        openButton.addEventHandler(ActionEvent.ACTION, new OpenFileChooserHandler(welcomeView.getStage()));
+        Button openButton = welcomeView.getSelect();
+        OpenFileChooserHandler ofch = new OpenFileChooserHandler(welcomeView.getStage());
+        ofch.setFileExt(FXCollections.observableArrayList(scb.getFileExtensions()));
+        ofch.setFileExtDescription("Mark Up");
+        openButton.addEventHandler(ActionEvent.ACTION, ofch);
 
         //ListView recent file list
         listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 selectedFileName = newValue;
+                if (!newValue.isEmpty()) {
+                    welcomeView.getOpenRecentFileButton().setDisable(false);
+                }
             }
         });
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
@@ -117,5 +124,9 @@ public class WelcomeViewController {
 
     private void initGUI() {
         listView.setItems(SystemConfigBean.createInstance().getRecentFileList());
+    }
+
+    private void setUpDefaultState() {
+        welcomeView.getOpenRecentFileButton().setDisable(true);
     }
 }

@@ -29,11 +29,13 @@ public class SystemConfigBean {
     private final StringProperty imagePath = new SimpleStringProperty("C:\\test3.png");
     private ObservableList<String> specialCharList = FXCollections.observableArrayList(new ArrayList<String>());
     private ObservableList<String> fileExtensions = FXCollections.observableArrayList(new ArrayList<String>());
+    private ObservableList<String> imageExtensions = FXCollections.observableArrayList(new ArrayList<String>());
     private ObservableList<String> recentFileList = FXCollections.observableArrayList(new ArrayList<String>());
 
     private SystemConfigBean() {
         setUpSpecialCharList();
         fileExtensions.add("*.xml");
+        imageExtensions.addAll("*.jpg", "*.jpeg", "*.png", "*.tiff");
     }
 
     public static SystemConfigBean createInstance() {
@@ -129,4 +131,11 @@ public class SystemConfigBean {
         return recentFileList;
     }
 
+    public ObservableList<String> getImageExtensions() {
+        return imageExtensions;
+    }
+
+    public void setImageExtensions(ObservableList<String> imageExtensions) {
+        this.imageExtensions = imageExtensions;
+    }
 }

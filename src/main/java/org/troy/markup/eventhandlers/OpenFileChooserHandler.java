@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -31,6 +32,8 @@ public class OpenFileChooserHandler implements EventHandler<ActionEvent> {
 
     private BeanManager bm;
     private Stage stage;
+    private ObservableList<String> fileExt;
+    private String fileExtDescription;
 
     public OpenFileChooserHandler(Stage stage) {
         bm = BeanManager.createInstance();
@@ -43,7 +46,7 @@ public class OpenFileChooserHandler implements EventHandler<ActionEvent> {
         FileChooser fc = new FileChooser();
         fc.setInitialDirectory(new File(scb.getInitialDirectory()));
         fc.setInitialFileName(null);
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Mark up", scb.getFileExtensions()));
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileExtDescription, fileExt));
         fc.setTitle("Open");
         File file = fc.showOpenDialog(stage);
         if (file != null) {
@@ -68,5 +71,22 @@ public class OpenFileChooserHandler implements EventHandler<ActionEvent> {
             }
         }
     }
+
+    public ObservableList<String> getFileExt() {
+        return fileExt;
+    }
+
+    public void setFileExt(ObservableList<String> fileExt) {
+        this.fileExt = fileExt;
+    }
+
+    public String getFileExtDescription() {
+        return fileExtDescription;
+    }
+
+    public void setFileExtDescription(String fileExtDescription) {
+        this.fileExtDescription = fileExtDescription;
+    }
+    
 
 }
