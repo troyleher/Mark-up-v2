@@ -58,10 +58,12 @@ public class OpenFileChooserHandler implements EventHandler<ActionEvent> {
                 AnnotationDAO dao = new AnnotationDAOJAXB();
 
                 Annotations a = dao.getAnnotations(file);
+                bm.setImagePath(a.getImagePath());
                 MainView mainView = new MainView(stage);
                 MainController mc = new MainController(mainView);
                 bm.setAnnotationList(FXCollections.observableArrayList(a.getAnotations()));
                 mc.initAnnotations(bm.getAnnotationList());
+                bm.setFileChanged(false);
             } catch (Exception ex) {
                 Logger.getLogger(OpenFileChooserHandler.class.getName()).log(Level.SEVERE, null, ex);
                 Alert alert = new Alert(Alert.AlertType.ERROR);

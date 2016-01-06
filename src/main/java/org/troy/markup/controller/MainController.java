@@ -197,6 +197,7 @@ public class MainController implements Controller{
                 a.getCircle().setIsCirclePressed(false);
                 urm.save(bm.getAnnotationList());
                 a.getCircle().setCircleMoved(false);
+                bm.setFileChanged(true);
             }
         });
         c.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
