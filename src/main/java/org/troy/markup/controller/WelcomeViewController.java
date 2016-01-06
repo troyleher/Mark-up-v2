@@ -117,6 +117,8 @@ public class WelcomeViewController {
                             Image thumbnail = new Image(imagePath.toURI().toString(), imageView.getFitWidth(), imageView.getFitHeight(), false, true);
                             System.out.println(thumbnail.getHeight());
                             imageView.setImage(thumbnail);
+                        }else{
+                            imageView.setImage(new Image("/images/noimage_thumbnail.jpg"));
                         }
                     } catch (JAXBException ex) {
                         Logger.getLogger(WelcomeViewController.class.getName()).log(Level.SEVERE, null, ex);
