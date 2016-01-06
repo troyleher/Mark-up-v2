@@ -57,13 +57,6 @@ public class WelcomeView extends BorderPane {
         gridPane.add(imagePreveiwLabel, 2, 0, 1, 1);
 
         
-        Label recentLabel = new Label("Recent file List");
-        recentLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 15));
-        gridPane.add(recentLabel, 0 , 0, 1, 1);
-        
-        Label imagePreveiwLabel = new Label("Image Preview");
-        imagePreveiwLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 15));
-        gridPane.add(imagePreveiwLabel, 2, 0, 1, 1);
         
         listView = new ListView<>();
         listView.setMaxHeight(150);
