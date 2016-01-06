@@ -34,7 +34,7 @@ public class WelcomeView extends BorderPane {
     private Button openRecentFileButton;
     private Stage stage;
     private ImageView imageView;
-
+    
     public WelcomeView(Stage stage) {
         this.stage = stage;
         initGUI();
@@ -56,10 +56,20 @@ public class WelcomeView extends BorderPane {
         imagePreveiwLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 15));
         gridPane.add(imagePreveiwLabel, 2, 0, 1, 1);
 
+        
+        Label recentLabel = new Label("Recent file List");
+        recentLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 15));
+        gridPane.add(recentLabel, 0 , 0, 1, 1);
+        
+        Label imagePreveiwLabel = new Label("Image Preview");
+        imagePreveiwLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 15));
+        gridPane.add(imagePreveiwLabel, 2, 0, 1, 1);
+        
         listView = new ListView<>();
         listView.setMaxHeight(150);
         gridPane.add(listView, 0, 1, 1, 1);
 
+        
         imageView = new javafx.scene.image.ImageView(new Image("/images/noimage_thumbnail.jpg"));
         imageView.setFitWidth(150);
         imageView.setFitHeight(150);
@@ -73,6 +83,7 @@ public class WelcomeView extends BorderPane {
         buttonHBox1.getChildren().add(openRecentFileButton);
         gridPane.add(buttonHBox1, 0, 2, 1, 1);
 
+        
         HBox buttonHBox = new HBox();
         buttonHBox.setSpacing(5);
         buttonHBox.setPadding(new Insets(30, 0, 0, 0));
