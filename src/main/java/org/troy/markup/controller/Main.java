@@ -12,8 +12,10 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.troy.markup.dao.AnnotationDAO;
 import org.troy.markup.dao.AnnotationDAOJAXB;
@@ -67,10 +69,14 @@ public class Main extends Application {
                 Alert shouldSave = new Alert(Alert.AlertType.WARNING);
                 shouldSave.setContentText("Save changes?");
                 shouldSave.getButtonTypes().clear();
-                shouldSave.getButtonTypes().add(ButtonType.YES);
-                shouldSave.getButtonTypes().add(ButtonType.NO);
+                
+                ButtonType buttonTypeYes = new ButtonType("Yes");
+                ButtonType buttonTypeNo = new ButtonType("No");
+                ButtonType buttonTypeCancel = new ButtonType("Cancel");
+                shouldSave.getButtonTypes().addAll(buttonTypeYes, buttonTypeNo, buttonTypeCancel);
+
                 Optional<ButtonType> result = shouldSave.showAndWait();
-                if (result.isPresent() && result.get() == ButtonType.YES) {
+                if (result.isPresent() && result.get() == buttonTypeYes) {
                     //If file exists save without prompting
                     String fileAbsolutePath = cb.getInitialDirectory() + "\\" + cb.getInitialFileName();
                     File fileToSave = new File(fileAbsolutePath);
@@ -84,9 +90,12 @@ public class Main extends Application {
                         SaveFileChooserHandler fileChooser = new SaveFileChooserHandler(primaryStage);
                         fileChooser.handle(null);
                     }
+                } else if (result.isPresent() && result.get() == buttonTypeNo) {
+                    System.out.println("No selected");
                 } else {
-
+                    e.consume();
                 }
+
                 shouldSave.close();
             }
             JAXBManager.saveStaticClasses(SystemConfigBean.class, SYSTEM_FILE_PATH, SystemConfigBean.createInstance());

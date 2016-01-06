@@ -77,6 +77,7 @@ public class WelcomeViewController {
                         ObservableList<Annotation> aList = FXCollections.observableArrayList(a.getAnotations());
                         bm.setAnnotationList(aList);
                         bm.setImagePath(a.getImagePath());
+                        welcomeView.getStage().setScene(null);
                         MainView mv = new MainView(welcomeView.getStage());
                         MainController mc = new MainController(mv);
                         mc.initAnnotations(bm.getAnnotationList());
