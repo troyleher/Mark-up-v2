@@ -10,8 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import org.troy.markup.model.Annotation;
 import org.troy.markup.model.SystemConfigBean;
+import org.troy.markup.view.AnnotationRectangleView;
 
 /**
  *
@@ -45,5 +48,16 @@ public class Utilities {
         if (aList.size() == 11) {
             aList.remove(10);
         }
+    }
+    public static Pane getPrintablePage(Pane paneToPrint){
+        Pane paneResult = new Pane();
+        ObservableList<Node> children = paneToPrint.getChildren();
+        for(Node n : children){
+            if(!(n instanceof AnnotationRectangleView)){
+     
+                paneResult.getChildren().add(n);
+            }
+        }
+        return paneResult;
     }
 }

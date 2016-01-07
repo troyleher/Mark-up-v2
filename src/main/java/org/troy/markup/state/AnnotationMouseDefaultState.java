@@ -30,8 +30,8 @@ public class AnnotationMouseDefaultState implements AnnotationMouseState{
 
     @Override
     public void changeCircleEffects(Circle c) {
-        c.setStroke(Color.GRAY);
-        c.setStrokeWidth(1);
+        c.setStroke(Color.BLACK);
+        c.setStrokeWidth(2);
         c.setFill(Color.TRANSPARENT);
     }
     

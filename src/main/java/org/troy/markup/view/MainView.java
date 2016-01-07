@@ -12,6 +12,8 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -43,6 +45,8 @@ public class MainView extends BorderPane {
     private MenuItem deleteMenuItem;
     private MenuItem openMenuItem;
     private MenuItem saveMenuItem;
+    private MenuItem pageSetupMenuItem;
+    private MenuItem printMenuItem;
     private Menu editMenu;
     private MenuItem redoMenuItem;
     private MenuItem undoMenuItem;
@@ -59,7 +63,9 @@ public class MainView extends BorderPane {
 
     private void initGUI() {
         imagePane = new AnchorPane();
-        this.setCenter(imagePane);
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(imagePane);
+        this.setCenter(scrollPane);
         setUpMenuBar();
         //Load a sample image for development only
         //Image image = new Image("/images/test.png");
@@ -75,9 +81,10 @@ public class MainView extends BorderPane {
         //primaryStage.setTitle(configBean.getMainFrameTitle());
         primaryStage.titleProperty().bind(configBean.mainFrameTitle().
                 concat(" ").concat(configBean.fileLocationProperty()));
-        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
-        primaryStage.setX((primScreenBounds.getWidth() - primaryStage.getWidth()) / 2);
-        primaryStage.setY((primScreenBounds.getHeight() - primaryStage.getHeight()) / 2);
+//        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+//        primaryStage.setX((primScreenBounds.getWidth() - primaryStage.getWidth()) / 2);
+//        primaryStage.setY((primScreenBounds.getHeight() - primaryStage.getHeight()) / 2);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
     private void setUpTableView(BorderPane borderPane) {
@@ -115,6 +122,15 @@ public class MainView extends BorderPane {
         //Save Menu
         saveMenuItem = new MenuItem("Save");
         fileMenu.getItems().add(saveMenuItem);
+        
+        SeparatorMenuItem seperator = new SeparatorMenuItem();
+        fileMenu.getItems().add(seperator);
+        
+        pageSetupMenuItem = new MenuItem("Page Setup...");
+        fileMenu.getItems().add(pageSetupMenuItem);
+        
+        printMenuItem = new MenuItem("Print...");
+        fileMenu.getItems().add(printMenuItem);
        
         //Edit menu item
         editMenu = new Menu("Edit");
@@ -169,6 +185,15 @@ public class MainView extends BorderPane {
     public Stage getPrimaryStage() {
         return primaryStage;
     }
+
+    public MenuItem getPageSetupMenuItem() {
+        return pageSetupMenuItem;
+    }
+
+    public MenuItem getPrintMenuItem() {
+        return printMenuItem;
+    }
+    
     
     
     

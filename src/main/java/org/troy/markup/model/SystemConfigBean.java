@@ -35,7 +35,7 @@ public class SystemConfigBean {
     private SystemConfigBean() {
         setUpSpecialCharList();
         fileExtensions.add("*.xml");
-        imageExtensions.addAll("*.jpg", "*.jpeg", "*.png", "*.tiff");
+        imageExtensions.addAll("*.jpg", "*.jpeg", "*.png", "*.tiff", "*.tif");
     }
 
     public static SystemConfigBean createInstance() {
